@@ -7,4 +7,10 @@ use App\Events\Event;
 class ConnectorRunCronEvent extends Event
 {
 
+    /**
+     * ConnectorRunCronEvent constructor.
+     */
+    public function __construct()
+    {
+    }
 }
