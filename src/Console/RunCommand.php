@@ -4,9 +4,9 @@ namespace Unifact\Connector\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Console\OutputStyle;
+use Psr\Log\LoggerInterface;
 use Unifact\Connector\Events\ConnectorRegisterHandlerEvent;
 use Unifact\Connector\Events\ConnectorRunCronEvent;
-use Unifact\Connector\Events\ConnectorRunJobEvent;
 use Unifact\Connector\Handler\Manager;
 use Unifact\Connector\Repository\JobContract;
 
@@ -30,17 +30,29 @@ class RunCommand extends Command
      * @var Manager
      */
     private $manager;
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
 
     /**
      * RunCommand constructor.
      * @param JobContract $jobRepo
+     * @param LoggerInterface $logger
      */
-    public function __construct(JobContract $jobRepo)
+    public function __construct(JobContract $jobRepo, LoggerInterface $logger)
     {
         parent::__construct();
 
+        \DB::connection()->statement('SET foreign_key_checks = 0;');
+        \DB::connection()->table('connector_job_stages')->truncate();
+        \DB::connection()->table('connector_jobs')->truncate();
+        \DB::connection()->table('connector_logs')->truncate();
+        \DB::connection()->statement('SET foreign_key_checks = 1;');
+
         $this->jobRepo = $jobRepo;
-        $this->manager = new Manager();
+        $this->manager = app(Manager::class);
+        $this->logger = $logger;
     }
 
 
@@ -82,17 +94,15 @@ class RunCommand extends Command
     {
         // Handle jobs
         $this->out('Handling Jobs.');
-
-
-        $jobs = $this->jobRepo->filter([
-            'status' => 'new'
-        ]);
-
-        foreach($jobs as $job){
-            \Event::fire(new ConnectorRunJobEvent($job));
-            $this->manager->handleJob($job);
+        try {
+            $this->manager->handleJobs();
+        } catch (\Exception $e) {
+            $this->logger->emergency("Highly unexpected exception while running the Connector Manager, investigation needed.",
+                [
+                    'message' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
         }
-
     }
 
 
@@ -104,7 +114,7 @@ class RunCommand extends Command
     protected function out($text, $newLine = true, $style = OutputStyle::OUTPUT_NORMAL)
     {
         if ($this->option('verbose')) {
-            $this->output->write('--> '.$text, $newLine, $style);
+            $this->output->write('--> ' . $text, $newLine, $style);
         }
     }
 }

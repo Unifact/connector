@@ -8,8 +8,8 @@ use Unifact\Connector\Models\Stage as StageModel;
 interface IStageProcessor
 {
     /**
-     * @param Job $job
+     * @param array $data
      * @return array|object
      */
-    public function process(Job $job);
+    public function process(array $data);
 }

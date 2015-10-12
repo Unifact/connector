@@ -11,4 +11,17 @@ interface StageContract
      * @return Stage
      */
     public function create($data);
+
+    /**
+     * @param $data
+     * @return Stage
+     */
+    public function createStub($data);
+
+    /**
+     * @param int $jobId
+     * @param int $stage
+     * @return Stage|null
+     */
+    public function findByJobIdAndStage($jobId, $stage);
 }

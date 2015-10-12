@@ -3,15 +3,13 @@
 namespace Unifact\Connector\Handler;
 
 use Unifact\Connector\Handler\Interfaces\IStageProcessor;
-use Unifact\Connector\Models\Job;
-use Unifact\Connector\Models\Stage as StageModel;
 
 abstract class Stage implements IStageProcessor
 {
     /**
-     * @param Job $job
+     * @param array $data
      * @return array|object
      */
-    abstract function process(Job $job);
+    abstract function process(array $data);
 
 }

@@ -3,9 +3,13 @@
 namespace Unifact\Connector\Handler;
 
 use Illuminate\Support\Collection;
+use Psr\Log\LoggerInterface;
+use Unifact\Connector\Events\ConnectorRunJobEvent;
 use Unifact\Connector\Exceptions\HandlerException;
 use Unifact\Connector\Handler\Interfaces\IJobHandler;
+use Unifact\Connector\Log\StateOracle;
 use Unifact\Connector\Models\Job;
+use Unifact\Connector\Repository\JobContract;
 
 class Manager
 {
@@ -15,11 +19,31 @@ class Manager
     protected $handlers;
 
     /**
-     * Manager constructor.
+     * @var StateOracle
      */
-    public function __construct()
+    private $oracle;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+    /**
+     * @var JobContract
+     */
+    private $jobRepo;
+
+    /**
+     * Manager constructor.
+     * @param JobContract $jobRepo
+     * @param StateOracle $oracle
+     * @param LoggerInterface $logger
+     */
+    public function __construct(JobContract $jobRepo, StateOracle $oracle, LoggerInterface $logger)
     {
         $this->handlers = new Collection();
+        $this->oracle = $oracle;
+        $this->logger = $logger;
+        $this->jobRepo = $jobRepo;
     }
 
     /**
@@ -53,27 +77,62 @@ class Manager
         return $this->handlers->offsetExists($type);
     }
 
+    public function handleJobs()
+    {
+        $jobs = $this->jobRepo->filter([
+            'status' => 'new'
+        ]);
+
+        foreach ($jobs as $job) {
+            try {
+                $this->oracle->setJobId($job->id);
+
+                $this->logger->info('Starting new Job');
+
+                $this->logger->debug('Firing ConnectorRunJobEvent before handling Job');
+                \Event::fire(new ConnectorRunJobEvent($job));
+
+                $this->logger->debug('Starting Job handling procedure');
+                if(!$this->handleJob($job)){
+                    $this->logger->notice('Controlled failure of handleJob (FALSE returned)');
+                }
+            } catch (\Exception $e) {
+                $this->logger->critical('Unexpected exception while handling Job (requires in-depth investigation)', [
+                    'message' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+            }
+        }
+    }
+
     /**
      * @param Job $job
      * @return bool
      * @throws HandlerException
      */
-    public function handleJob(Job $job)
+    protected function handleJob(Job $job)
     {
         if ($this->hasHandlerForType($job->type)) {
             $handler = $this->getHandlerForType($job->type);
 
             if (!$handler->prepare()) {
+                $this->logger->error('Handler returned FALSE in prepare() method');
+
                 return false;
             }
             if (!$handler->handle($job)) {
+                $this->logger->error('Handler returned FALSE in handle() method');
+
                 return false;
             }
 
             $handler->complete();
+            $this->logger->info('Finished Job successfully');
 
             return true;
         }
+
+        $this->logger->error("No handler registered for type '{$job->type}'");
 
         return false;
     }

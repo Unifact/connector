@@ -3,7 +3,9 @@
 namespace Unifact\Connector\Repository;
 
 use Illuminate\Database\Eloquent\Collection;
+use Unifact\Connector\Exceptions\ConnectorException;
 use Unifact\Connector\Models\Job;
+use Unifact\Connector\Models\Stage as StageModel;
 
 interface JobContract
 {
@@ -39,4 +41,12 @@ interface JobContract
      * @return bool
      */
     public function delete($id);
+
+    /**
+     * @param $id
+     * @param StageModel $stage
+     * @return bool
+     * @throws ConnectorException
+     */
+    public function attachStage($id, StageModel $stage);
 }
