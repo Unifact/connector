@@ -18,6 +18,8 @@ class Job extends \Eloquent
 
     const STATUS_RETRY = 'retry';
 
+    const STATUS_RESTART = 'restart';
+
     const STATUS_SKIP = 'skip';
 
 
@@ -57,7 +59,7 @@ class Job extends \Eloquent
      */
     public function getLastStage()
     {
-        return $this->stages()->orderBy('status', 'desc')->first();
+        return $this->stages()->orderBy('id', 'desc')->first();
     }
 
 }

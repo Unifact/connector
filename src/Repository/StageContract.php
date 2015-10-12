@@ -24,4 +24,17 @@ interface StageContract
      * @return Stage|null
      */
     public function findByJobIdAndStage($jobId, $stage);
+
+    /**
+     * @param $jobId
+     * @param $status
+     * @return Stage|null
+     */
+    public function findLastByJobIdAndStatus($jobId, $status);
+
+    /**
+     * @param $jobId
+     * @return bool
+     */
+    public function deleteByJobId($jobId);
 }

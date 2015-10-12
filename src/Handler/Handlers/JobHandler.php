@@ -118,12 +118,19 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
     {
         $success = true;
 
+        list($fromStageNumber, $preloadedData) = $this->prepareStageData($job);
+
         foreach ($this->stages as $n => $stage) {
             try {
                 $stageNumber = $n + 1;
+                if ($stageNumber < $fromStageNumber) {
+                    $this->logger->debug("Skipping Stage because of retry");
+                    continue;
+                }
+
                 $this->oracle->setStageNumber($stageNumber);
 
-                $this->handleStage($job, $stage, $stageNumber);
+                $this->handleStage($job, $stage, $stageNumber, $preloadedData);
                 $this->logger->info("Stage successfully processed");
             } catch (\Exception $e) {
                 $this->logger->notice("Exception was thrown in the JobHandler handle() method, cannot continue (status: error)",
@@ -157,22 +164,29 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
      * @param JobModel $job
      * @param IStageProcessor $stage
      * @param $number
+     * @param null $preloadedData is used when status is STATUS_RETRY
      * @throws HandlerException
      */
-    protected function handleStage(JobModel $job, IStageProcessor $stage, $number)
+    protected function handleStage(JobModel $job, IStageProcessor $stage, $number, $preloadedData = null)
     {
         try {
             if ($number === 1) {
                 // pass the parsed job data when this is the first stage.
-                $data = $stage->process($job->getParsedData());
+                $data = $stage->process($preloadedData ?: $job->getParsedData());
             } else {
-                $lastStageNumber = $number - 1;
-                $lastStage = $this->stageRepo->findByJobIdAndStage($job->id, $lastStageNumber);
-                if (is_null($lastStage)) {
-                    throw new ConnectorException("Last Stage output is NULL, array expected.");
+                if ($preloadedData) {
+                    $processData = $preloadedData;
+                } else {
+                    $lastStageNumber = $number - 1;
+                    $lastStage = $this->stageRepo->findByJobIdAndStage($job->id, $lastStageNumber);
+                    if (is_null($lastStage)) {
+                        throw new ConnectorException("Last Stage output is NULL, array expected.");
+                    }
+                    $processData = $lastStage->getParsedData();
                 }
+
                 // pass the last processed stage's parsed data
-                $data = $stage->process($lastStage->getParsedData());
+                $data = $stage->process($processData);
             }
 
             if (is_null($data)) {
@@ -199,6 +213,35 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
         } catch (\Exception $e) {
             throw new HandlerException("Unexpected exception while processing stage (job_id: {$job->id}).");
         }
+    }
+
+    /**
+     * @param JobModel $job
+     * @return array
+     * @throws ConnectorException
+     */
+    protected function prepareStageData(JobModel $job)
+    {
+        $fromStageNumber = 1;
+        $preloadedData = null;
+
+        if ($job->status === JobModel::STATUS_NEW) {
+            // Defaults are OK
+        } elseif ($job->status === JobModel::STATUS_RETRY) {
+            $lastStage = $this->stageRepo->findLastByJobIdAndStatus($job->id, 'processed');
+
+            if ($lastStage !== null) {
+                $fromStageNumber = (int)$lastStage->stage + 1;
+                $preloadedData = $lastStage->getParsedData();
+            }
+        } elseif ($job->status === JobModel::STATUS_RESTART) {
+            $this->stageRepo->deleteByJobId($job->id);
+            // Defaults are OK
+        } else {
+            throw new HandlerException("Unexpected Job status (status: {$job->status}), cannot prepare Stages.");
+        }
+
+        return [$fromStageNumber, $preloadedData];
     }
 
 }

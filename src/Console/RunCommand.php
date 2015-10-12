@@ -95,9 +95,9 @@ class RunCommand extends Command
         // Handle jobs
         $this->out('Handling Jobs.');
         try {
-            $this->manager->handleJobs();
+            $this->manager->start();
         } catch (\Exception $e) {
-            $this->logger->emergency("Highly unexpected exception while running the Connector Manager, investigation needed.",
+            $this->logger->emergency("Highly unexpected exception while running Manager->start(), investigation needed.",
                 [
                     'message' => $e->getMessage(),
                     'trace' => $e->getTraceAsString()

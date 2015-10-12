@@ -27,10 +27,17 @@ class Manager
      * @var LoggerInterface
      */
     private $logger;
+
     /**
      * @var JobContract
      */
     private $jobRepo;
+
+    protected $handleOrder = [
+        'retry',
+        'restart',
+        'new'
+    ];
 
     /**
      * Manager constructor.
@@ -77,23 +84,35 @@ class Manager
         return $this->handlers->offsetExists($type);
     }
 
-    public function handleJobs()
+    /**
+     * Main enty point to handling Jobs, is called from the RunCommand class
+     */
+    public function start()
     {
-        $jobs = $this->jobRepo->filter([
-            'status' => 'new'
-        ]);
+        foreach ($this->handleOrder as $status) {
+            $jobs = $this->jobRepo->filter([['status', $status]]);
 
+            $this->logger->info("Starting Jobs with status '{$status}'");
+            $this->handleJobs($jobs);
+        }
+    }
+
+    /**
+     * @param Collection $jobs
+     */
+    protected function handleJobs(Collection $jobs)
+    {
         foreach ($jobs as $job) {
             try {
                 $this->oracle->setJobId($job->id);
 
-                $this->logger->info('Starting new Job');
+                $this->logger->info("Starting new '{$job->type}' Job");
 
                 $this->logger->debug('Firing ConnectorRunJobEvent before handling Job');
                 \Event::fire(new ConnectorRunJobEvent($job));
 
                 $this->logger->debug('Starting Job handling procedure');
-                if(!$this->handleJob($job)){
+                if (!$this->handleJob($job)) {
                     $this->logger->notice('Controlled failure of handleJob (FALSE returned)');
                 }
             } catch (\Exception $e) {

@@ -56,5 +56,28 @@ class StageRepository implements StageContract
             ->first();
     }
 
+    /**
+     * @param $jobId
+     * @param $status
+     * @return Stage|null
+     */
+    public function findLastByJobIdAndStatus($jobId, $status)
+    {
+        return Stage::orderBy('stage', 'desc')
+            ->orderBy('id', 'desc')
+            ->where('job_id', '=', $jobId)
+            ->where('status', '=', $status)
+            ->first();
+    }
+
+    /**
+     * @param $jobId
+     * @return bool
+     */
+    public function deleteByJobId($jobId)
+    {
+        return Stage::where('job_id', '=', $jobId)->delete();
+    }
+
 
 }

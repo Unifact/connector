@@ -17,8 +17,8 @@ class CreateConnectorLogsTable extends Migration
             $table->string('message', 128);
             $table->smallInteger('level');
             $table->text('data');
-            $table->integer('job_id');
-            $table->integer('stage_number');
+            $table->integer('job_id')->nullable();
+            $table->integer('stage_number')->nullable();
             $table->timestamps();
         });
     }
