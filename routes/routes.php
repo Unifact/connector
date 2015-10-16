@@ -1,9 +1,7 @@
 <?php /* created by Rob van Bentem, 16/10/2015 */
 
-
-$domain = sprintf('%s.%s', 'connector', env('DOMAIN', 'localhost'));
+$domain = env('CONNECTOR_DOMAIN', sprintf('%s.%s', 'connector', env('DOMAIN', 'localhost')));
 $namespace = '\Unifact\Connector\Http\Controllers';
-
 
 // No auth needed
 Route::group(['domain' => $domain, 'namespace' => $namespace, 'middleware' => ['connector.auth']], function () {
