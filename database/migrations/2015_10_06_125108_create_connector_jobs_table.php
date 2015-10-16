@@ -23,6 +23,8 @@ class CreateConnectorJobsTable extends Migration
             $table->index(['type', 'status'], 'idx_type_status');
             $table->index('reference', 'idx_reference');
         });
+
+        DB::statement('ALTER TABLE `connector_jobs` ADD FULLTEXT idx_job_data(data)');
     }
 
     /**
