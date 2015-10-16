@@ -26,6 +26,8 @@ class CreateConnectorJobStagesTable extends Migration
             $table->index(['job_id', 'stage'], 'idx_jobId_stage');
             $table->index(['job_id', 'status'], 'idx_jobId_status');
         });
+
+        DB::statement('ALTER TABLE `connector_jobs_stages` ADD FULLTEXT idx_stage_data(data)');
     }
 
     /**
