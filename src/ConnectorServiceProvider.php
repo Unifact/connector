@@ -5,6 +5,7 @@ namespace Unifact\Connector;
 use Illuminate\Support\ServiceProvider;
 use Psr\Log\LoggerInterface;
 use Unifact\Connector\Console\RunCommand;
+use Unifact\Connector\Http\Middleware\Auth;
 use Unifact\Connector\Log\ConnectorLogger;
 use Unifact\Connector\Log\Interfaces\IConnectorLogger;
 use Unifact\Connector\Log\StateOracle;
@@ -22,9 +23,30 @@ class ConnectorServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // Migrations
         $this->publishes([
             __DIR__ . '/../database/migrations/' => database_path('migrations')
         ], 'migrations');
+
+        // Configs
+        $this->publishes([
+            __DIR__ . '/../config/' => base_path('config')
+        ], 'config');
+
+        // Assets
+        $this->publishes([
+            __DIR__ . '/../assets/' => public_path('vendor/unifact')
+        ], 'public');
+
+
+
+        $this->loadViewsFrom(__DIR__ . '/../views', 'connector');
+
+        if (!$this->app->routesAreCached()) {
+            require __DIR__ . '/../routes/routes.php';
+        }
+
+        $this->app['router']->middleware('connector.auth', Auth::class);
     }
 
     /**
@@ -34,8 +56,6 @@ class ConnectorServiceProvider extends ServiceProvider
      */
     public function register()
     {
-
-
         $this->app->singleton(JobContract::class, JobRepository::class);
         $this->app->singleton(StageContract::class, StageRepository::class);
 

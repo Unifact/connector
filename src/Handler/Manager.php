@@ -104,7 +104,7 @@ class Manager
     {
         foreach ($jobs as $job) {
             try {
-                $this->oracle->setJobId($job->id);
+                $this->oracle->reset($job->id);
 
                 $this->logger->info("Starting new '{$job->type}' Job");
 
@@ -113,10 +113,11 @@ class Manager
 
                 $this->logger->debug('Starting Job handling procedure');
                 if (!$this->handleJob($job)) {
-                    $this->logger->notice('Controlled failure of handleJob (FALSE returned)');
+                    $this->logger->notice('Job failed', $this->oracle->asArray());
                 }
             } catch (\Exception $e) {
                 $this->logger->critical('Unexpected exception while handling Job (requires in-depth investigation)', [
+                    'oracle' => $this->oracle->asArray(),
                     'message' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
                 ]);
@@ -131,27 +132,33 @@ class Manager
      */
     protected function handleJob(Job $job)
     {
+        $oracleInfo = $this->oracle->asArray();
+
         if ($this->hasHandlerForType($job->type)) {
             $handler = $this->getHandlerForType($job->type);
 
+            $this->logger->debug("Preparing Job..", $oracleInfo);
             if (!$handler->prepare()) {
-                $this->logger->error('Handler returned FALSE in prepare() method');
-
-                return false;
-            }
-            if (!$handler->handle($job)) {
-                $this->logger->error('Handler returned FALSE in handle() method');
+                $this->logger->error('Handler returned FALSE in prepare() method, see log for details', $oracleInfo);
 
                 return false;
             }
 
+            $this->logger->debug("Handling Job..", $oracleInfo);
+            if ($handler->handle($job) === false) {
+                $this->logger->error('Handler returned FALSE in handle() method, see log for details', $oracleInfo);
+
+                return false;
+            }
+
+            $this->logger->debug("Completing Job..", $oracleInfo);
             $handler->complete();
             $this->logger->info('Finished Job successfully');
 
             return true;
         }
 
-        $this->logger->error("No handler registered for type '{$job->type}'");
+        $this->logger->error("No handler registered for type '{$job->type}'", $oracleInfo);
 
         return false;
     }

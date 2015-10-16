@@ -47,6 +47,16 @@ class StateOracle
     }
 
     /**
+     * @param null $jobId
+     * @param null $stageNumber
+     */
+    public function reset($jobId = null, $stageNumber = null)
+    {
+        $this->setJobId($jobId);
+        $this->setStageNumber($stageNumber);
+    }
+
+    /**
      * @return array
      */
     public function asArray()

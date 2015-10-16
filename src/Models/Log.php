@@ -11,7 +11,7 @@ class Log extends \Eloquent
         'level',
         'data',
         'job_id',
-        'stage_number',
+        'stage',
     ];
 
 }

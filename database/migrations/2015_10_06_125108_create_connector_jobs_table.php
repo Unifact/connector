@@ -17,9 +17,11 @@ class CreateConnectorJobsTable extends Migration
             $table->string('type', 64);
             $table->text('data');
             $table->string('status', 32);
+            $table->string('reference', 64);
             $table->timestamps();
 
             $table->index(['type', 'status'], 'idx_type_status');
+            $table->index('reference', 'idx_reference');
         });
     }
 

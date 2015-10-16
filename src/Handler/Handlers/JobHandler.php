@@ -82,7 +82,7 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
      */
     public function __construct(
         $type,
-        $stages = [],
+        array $stages = [],
         JobContract $jobRepo,
         StageContract $stageRepo,
         LoggerInterface $logger,
@@ -104,7 +104,16 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
      */
     public function prepare()
     {
-        $this->logger->debug('Preparing Job');
+        if ($this->stages->count() === 0) {
+            $this->logger->warning("Job has no stages, cannot continue");
+            return false;
+        }
+
+        foreach ($this->stages as $stage) {
+            $stage->setJobHandler($this);
+        }
+
+        $this->logger->debug("Prepared Job with {$this->stages->count()} stages");
 
         return true;
     }
@@ -118,13 +127,15 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
     {
         $success = true;
 
+        $this->job = $job;
+
         list($fromStageNumber, $preloadedData) = $this->prepareStageData($job);
 
         foreach ($this->stages as $n => $stage) {
             try {
                 $stageNumber = $n + 1;
                 if ($stageNumber < $fromStageNumber) {
-                    $this->logger->debug("Skipping Stage because of retry");
+                    $this->logger->info("Skipping Stage because of retry");
                     continue;
                 }
 
@@ -133,7 +144,7 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
                 $this->handleStage($job, $stage, $stageNumber, $preloadedData);
                 $this->logger->info("Stage successfully processed");
             } catch (\Exception $e) {
-                $this->logger->notice("Exception was thrown in the JobHandler handle() method, cannot continue (status: error)",
+                $this->logger->warning("Exception was thrown in the JobHandler handle() method, cannot continue (status: error)",
                     [
                         'exception_message' => $e->getMessage(),
                         'exception_trace' => $e->getTraceAsString()
@@ -189,7 +200,7 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
                 $data = $stage->process($processData);
             }
 
-            if (is_null($data)) {
+            if (is_null($data) || $data === false) {
                 // $data must be array|object (it needs to be json decodeable to an array).
                 throw new ConnectorException("Data was NULL after processing stage.");
             }
@@ -244,4 +255,15 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
         return [$fromStageNumber, $preloadedData];
     }
 
+    /**
+     * Updates the `reference` column in the `connector_jobs` table
+     *
+     * @param $reference
+     */
+    public function setJobReference($reference)
+    {
+        $this->jobRepo->update($this->job->id, [
+            'reference' => $reference
+        ]);
+    }
 }
