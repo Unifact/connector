@@ -2,10 +2,26 @@
 
 namespace Unifact\Connector\Repository;
 
+use Illuminate\Database\Eloquent\Collection;
 use Unifact\Connector\Models\Stage;
 
 interface StageContract
 {
+
+    /**
+     * @param $id
+     * @return Stage
+     */
+    public function findById($id);
+
+    /**
+     * @param array $filters
+     * @param string $orderBy
+     * @param string $orderDir
+     * @return Stage[]|Collection
+     */
+    public function filter(array $filters = [], $orderBy = 'created_at', $orderDir = 'asc');
+
     /**
      * @param $data
      * @return Stage
@@ -20,7 +36,7 @@ interface StageContract
 
     /**
      * @param int $jobId
-     * @param int $stage
+     * @param string $stage
      * @return Stage|null
      */
     public function findByJobIdAndStage($jobId, $stage);
@@ -37,4 +53,11 @@ interface StageContract
      * @return bool
      */
     public function deleteByJobId($jobId);
+
+    /**
+     * Returns the stage begore the given Stage
+     * @param Stage $stage
+     * @return Stage|null
+     */
+    public function getPrecedingStage(Stage $stage);
 }

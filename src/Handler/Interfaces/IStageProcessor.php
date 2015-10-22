@@ -8,6 +8,11 @@ use Unifact\Connector\Models\Stage as StageModel;
 interface IStageProcessor
 {
     /**
+     * @return string
+     */
+    public function getName();
+
+    /**
      * @param array $data
      * @return array|object
      */

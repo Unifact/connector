@@ -2,6 +2,8 @@
 
 namespace Unifact\Connector\Models;
 
+use Unifact\Connector\Models\Collections\LogCollection;
+
 class Log extends \Eloquent
 {
     public $table = 'connector_logs';
@@ -14,4 +16,12 @@ class Log extends \Eloquent
         'stage',
     ];
 
+    /**
+     * @param array $models
+     * @return LogCollection
+     */
+    public function newCollection(array $models = [])
+    {
+        return new LogCollection($models);
+    }
 }

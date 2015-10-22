@@ -49,4 +49,10 @@ interface JobContract
      * @throws ConnectorException
      */
     public function attachStage($id, StageModel $stage);
+
+    /**
+     * @param int $amount
+     * @return \Unifact\Connector\Models\Job[]
+     */
+    public function latest($amount = 10, $filters = [], $orderBy = 'created_at', $orderDir = 'desc');
 }

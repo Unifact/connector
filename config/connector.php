@@ -5,6 +5,9 @@ use Monolog\Logger;
 return [
     'logging' => [
         'context' => 'connector',
+        'logviewer' => [
+            'min_level' => Logger::DEBUG
+        ],
         'handlers' => [
             'file' => [
                 'enabled' => true,
@@ -23,5 +26,10 @@ return [
                 'notify' => true // blink to draw attention to the user
             ],
         ]
+    ],
+    'icons' => [
+        'job' => 'glyphicon glyphicon-record',
+        'stage' => 'glyphicon glyphicon-unchecked',
+        'log' => 'glyphicon glyphicon-console'
     ]
 ];

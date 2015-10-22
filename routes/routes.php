@@ -4,19 +4,31 @@ $domain = env('CONNECTOR_DOMAIN', sprintf('%s.%s', 'connector', env('DOMAIN', 'l
 $namespace = '\Unifact\Connector\Http\Controllers';
 $prefix = env('CONNECTOR_PREFIX', 'cnr');
 
-// No auth needed
+// Restricted routes (auth needed)
 Route::group([
     'domain' => $domain,
     'prefix' => $prefix,
     'namespace' => $namespace,
     'middleware' => ['connector.auth']
 ], function () {
-    Route::get('test', function () {
-        return 'test';
-    });
+
+    // Dashboard
+    Route::get('/', ['as' => 'connector.dashboard.index', 'uses' => 'DashboardController@index']);
+
+    // Job
+    Route::get('jobs/{jobId}', ['as' => 'connector.jobs.show', 'uses' => 'JobController@show']);
+    Route::put('jobs/{jobId}', ['as' => 'connector.jobs.update', 'uses' => 'JobController@update']);
+
+    // Stage
+    Route::get('jobs/{jobId}/stage/{stageId}', ['as' => 'connector.stages.show', 'uses' => 'StageController@show']);
+
+    // Search
+    Route::get('search', ['as' => 'connector.search', 'uses' => 'SearchController@search']);
 });
 
-// Lock it up boyz
+// Unrestricted routes
 Route::group(['domain' => $domain, 'namespace' => $namespace, 'prefix' => $prefix], function () {
-    Route::get('login', ['uses' => 'LoginController@login', 'as' => 'connector.login']);
+    Route::get('auth/login', ['uses' => 'AuthController@getLogin', 'as' => 'connector.auth.login.get']);
+    Route::post('auth/login', ['uses' => 'AuthController@postLogin', 'as' => 'connector.auth.login.post']);
+    Route::get('auth/logout', ['uses' => 'AuthController@logout', 'as' => 'connector.auth.logout']);
 });

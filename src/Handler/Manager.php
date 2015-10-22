@@ -7,6 +7,7 @@ use Psr\Log\LoggerInterface;
 use Unifact\Connector\Events\ConnectorRunJobEvent;
 use Unifact\Connector\Exceptions\HandlerException;
 use Unifact\Connector\Handler\Interfaces\IJobHandler;
+use Unifact\Connector\Log\ConnectorLoggerInterface;
 use Unifact\Connector\Log\StateOracle;
 use Unifact\Connector\Models\Job;
 use Unifact\Connector\Repository\JobContract;
@@ -43,9 +44,9 @@ class Manager
      * Manager constructor.
      * @param JobContract $jobRepo
      * @param StateOracle $oracle
-     * @param LoggerInterface $logger
+     * @param ConnectorLoggerInterface $logger
      */
-    public function __construct(JobContract $jobRepo, StateOracle $oracle, LoggerInterface $logger)
+    public function __construct(JobContract $jobRepo, StateOracle $oracle, ConnectorLoggerInterface $logger)
     {
         $this->handlers = new Collection();
         $this->oracle = $oracle;
@@ -115,6 +116,7 @@ class Manager
                 if (!$this->handleJob($job)) {
                     $this->logger->notice('Job failed', $this->oracle->asArray());
                 }
+                $this->oracle->reset();
             } catch (\Exception $e) {
                 $this->logger->critical('Unexpected exception while handling Job (requires in-depth investigation)', [
                     'oracle' => $this->oracle->asArray(),
@@ -157,6 +159,10 @@ class Manager
 
             return true;
         }
+
+        $this->jobRepo->update($job->id, [
+            'status' => 'error',
+        ]);
 
         $this->logger->error("No handler registered for type '{$job->type}'", $oracleInfo);
 

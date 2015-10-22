@@ -3,6 +3,7 @@
 namespace Unifact\Connector\Models;
 
 use Unifact\Connector\Handler\Traits\JsonDataTrait;
+use Unifact\Connector\Models\Collections\StageCollection;
 
 class Stage extends \Eloquent
 {
@@ -23,4 +24,12 @@ class Stage extends \Eloquent
         'status',
     ];
 
+    /**
+     * @param array $models
+     * @return StageCollection
+     */
+    public function newCollection(array $models = [])
+    {
+        return new StageCollection($models);
+    }
 }

@@ -12,7 +12,7 @@ class StateOracle
     /**
      * @var int
      */
-    protected $stageNumber;
+    protected $stage;
 
     /**
      * @return int
@@ -31,29 +31,29 @@ class StateOracle
     }
 
     /**
-     * @return int
+     * @return string
      */
-    public function getStageNumber()
+    public function getStage()
     {
-        return $this->stageNumber;
+        return $this->stage;
     }
 
     /**
-     * @param int $stageNumber
+     * @param string $stage
      */
-    public function setStageNumber($stageNumber)
+    public function setStage($stage)
     {
-        $this->stageNumber = $stageNumber;
+        $this->stage = $stage;
     }
 
     /**
      * @param null $jobId
-     * @param null $stageNumber
+     * @param null $stage
      */
-    public function reset($jobId = null, $stageNumber = null)
+    public function reset($jobId = null, $stage = null)
     {
         $this->setJobId($jobId);
-        $this->setStageNumber($stageNumber);
+        $this->setStage($stage);
     }
 
     /**
@@ -63,7 +63,7 @@ class StateOracle
     {
         return [
             'job_id' => $this->getJobId(),
-            'stage_number' => $this->getStageNumber()
+            'stage' => $this->getStage()
         ];
     }
 }

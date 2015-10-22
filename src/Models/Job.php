@@ -2,8 +2,8 @@
 
 namespace Unifact\Connector\Models;
 
-use Unifact\Connector\Exceptions\ConnectorException;
 use Unifact\Connector\Handler\Traits\JsonDataTrait;
+use Unifact\Connector\Models\Collections\JobCollection;
 
 class Job extends \Eloquent
 {
@@ -27,6 +27,7 @@ class Job extends \Eloquent
 
     public $fillable = [
         'type',
+        'reference',
         'data',
         'status',
     ];
@@ -40,7 +41,7 @@ class Job extends \Eloquent
      */
     public function stages()
     {
-        return $this->hasMany(Stage::class, 'job_id', 'id');
+        return $this->hasMany(Stage::class, 'job_id', 'id')->orderBy('id', 'asc');
     }
 
     /**
@@ -60,6 +61,15 @@ class Job extends \Eloquent
     public function getLastStage()
     {
         return $this->stages()->orderBy('id', 'desc')->first();
+    }
+
+    /**
+     * @param array $models
+     * @return JobCollection
+     */
+    public function newCollection(array $models = [])
+    {
+        return new JobCollection($models);
     }
 
 }

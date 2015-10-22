@@ -2,6 +2,7 @@
 
 namespace Unifact\Connector\Handler\Traits;
 
+use Camspiers\JsonPretty\JsonPretty;
 use Unifact\Connector\Exceptions\ConnectorException;
 
 trait JsonDataTrait
@@ -16,6 +17,17 @@ trait JsonDataTrait
             return $data;
         }
 
-        throw new ConnectorException("Could not decode " . get_class($this), " data column to json (id: {$this->primaryKey}.");
+        throw new ConnectorException("Could not decode " . get_class($this),
+            " data column to json (id: {$this->primaryKey}.");
+    }
+
+    /**
+     * @return string
+     * @throws ConnectorException
+     */
+    public function getPrettyData()
+    {
+        $jsonPretty = new JsonPretty;
+        return $jsonPretty->prettify($this->getParsedData());
     }
 }

@@ -2,11 +2,20 @@
 
 namespace Unifact\Connector\Repository;
 
+use Illuminate\Database\Eloquent\Collection;
 use Unifact\Connector\Exceptions\ConnectorException;
 use Unifact\Connector\Models\Stage;
 
 class StageRepository implements StageContract
 {
+    /**
+     * @param $id
+     * @return \Illuminate\Database\Eloquent\Model|static
+     */
+    public function findById($id)
+    {
+        return Stage::where('id', '=', $id)->firstOrFail();
+    }
 
     /**
      * @param $data
@@ -46,7 +55,7 @@ class StageRepository implements StageContract
 
     /**
      * @param int $jobId
-     * @param int $stage
+     * @param string $stage
      * @return null|Stage
      */
     public function findByJobIdAndStage($jobId, $stage)
@@ -79,5 +88,59 @@ class StageRepository implements StageContract
         return Stage::where('job_id', '=', $jobId)->delete();
     }
 
+    /**
+     * @param Stage $stage
+     * @return \Illuminate\Database\Eloquent\Model|null|static
+     */
+    public function getPrecedingStage(Stage $stage)
+    {
+        return Stage::where('job_id', '=', $stage->job_id)
+            ->where('id', '!=', $stage->id)
+            ->where('id', '<', $stage->id)
+            ->orderBy('id', 'desc')
+            ->first();
+    }
+
+
+    /**
+     * @param array $filters
+     * @param string $orderBy
+     * @param string $orderDir
+     * @return Stage[]|Collection
+     */
+    public function filter(array $filters = [], $orderBy = 'created_at', $orderDir = 'asc')
+    {
+        $model = $this->getFilterQry($filters, $orderBy, $orderDir);
+
+        return $model->get();
+    }
+
+
+    /**
+     * @param array $filters
+     * @param $orderBy
+     * @param $orderDir
+     * @return $this|Stage
+     */
+    private function getFilterQry(array $filters, $orderBy, $orderDir)
+    {
+        $model = new Stage();
+
+        foreach ($filters as $filter) {
+            if (count($filter) == 2) {
+                if ($filter[1] === 'NOT NULL') {
+                    $model = $model->whereNotNull($filter[0]);
+                } else {
+                    $model = $model->where($filter[0], $filter[1]);
+                }
+            } elseif (count($filter) == 3) {
+                $model = $model->where($filter[0], $filter[1], $filter[2]);
+            }
+        }
+
+        $model = $model->orderBy($orderBy, $orderDir);
+
+        return $model;
+    }
 
 }

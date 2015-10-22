@@ -8,6 +8,7 @@ use Psr\Log\LoggerInterface;
 use Unifact\Connector\Events\ConnectorRegisterHandlerEvent;
 use Unifact\Connector\Events\ConnectorRunCronEvent;
 use Unifact\Connector\Handler\Manager;
+use Unifact\Connector\Log\ConnectorLoggerInterface;
 use Unifact\Connector\Repository\JobContract;
 
 class RunCommand extends Command
@@ -40,15 +41,15 @@ class RunCommand extends Command
      * @param JobContract $jobRepo
      * @param LoggerInterface $logger
      */
-    public function __construct(JobContract $jobRepo, LoggerInterface $logger)
+    public function __construct(JobContract $jobRepo, ConnectorLoggerInterface $logger)
     {
         parent::__construct();
 
-        \DB::connection()->statement('SET foreign_key_checks = 0;');
+/*        \DB::connection()->statement('SET foreign_key_checks = 0;');
         \DB::connection()->table('connector_job_stages')->truncate();
         \DB::connection()->table('connector_jobs')->truncate();
         \DB::connection()->table('connector_logs')->truncate();
-        \DB::connection()->statement('SET foreign_key_checks = 1;');
+        \DB::connection()->statement('SET foreign_key_checks = 1;');*/
 
         $this->jobRepo = $jobRepo;
         $this->manager = app(Manager::class);

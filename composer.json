@@ -1,40 +1,41 @@
 {
-  "name": "Unifact/Connector",
-  "description": "Unifact connector",
-  "homepage": "https://github.com/Unifact/Connector",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Rob van Bentem",
-      "email": "vanbentem@unifact.eu"
+    "name": "Unifact/Connector",
+    "description": "Unifact connector",
+    "homepage": "https://github.com/Unifact/Connector",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Rob van Bentem",
+            "email": "vanbentem@unifact.eu"
+        }
+    ],
+    "require": {
+        "illuminate/support": "~5.1",
+        "mtdowling/cron-expression": "~1.0",
+        "php": ">=5.5.9",
+        "monolog/monolog": "^1.17",
+        "camspiers/json-pretty": "1.0.*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "4.*",
+        "scrutinizer/ocular": "~1.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Unifact\\Connector\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Unifact\\Connector\\Test\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
     }
-  ],
-  "require": {
-    "illuminate/support": "~5.1",
-    "mtdowling/cron-expression": "~1.0",
-    "php": ">=5.5.9",
-    "monolog/monolog": "^1.17"
-  },
-  "require-dev": {
-    "phpunit/phpunit": "4.*",
-    "scrutinizer/ocular": "~1.1"
-  },
-  "autoload": {
-    "psr-4": {
-      "Unifact\\Connector\\": "src"
-    }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Unifact\\Connector\\Test\\": "tests"
-    }
-  },
-  "scripts": {
-    "test": "phpunit"
-  },
-  "extra": {
-    "branch-alias": {
-      "dev-master": "1.0-dev"
-    }
-  }
 }

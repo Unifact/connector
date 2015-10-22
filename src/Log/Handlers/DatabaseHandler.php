@@ -37,7 +37,7 @@ class DatabaseHandler extends AbstractProcessingHandler
             'level' => $record['level'],
             'data' => $record['formatted'],
             'job_id' => $this->oracle->getJobId(),
-            'stage' => $this->oracle->getStageNumber(),
+            'stage' => $this->oracle->getStage(),
         ];
 
         Log::create($attributes);

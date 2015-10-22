@@ -15,7 +15,7 @@ class CreateConnectorJobStagesTable extends Migration
         Schema::create('connector_job_stages', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('job_id');
-            $table->tinyInteger('stage');
+            $table->string('stage',64);
             $table->text('data');
             $table->string('status', 32);
             $table->timestamps();
@@ -27,7 +27,7 @@ class CreateConnectorJobStagesTable extends Migration
             $table->index(['job_id', 'status'], 'idx_jobId_status');
         });
 
-        DB::statement('ALTER TABLE `connector_jobs_stages` ADD FULLTEXT idx_stage_data(data)');
+        DB::statement('ALTER TABLE `connector_job_stages` ADD FULLTEXT idx_stage_data(data)');
     }
 
     /**

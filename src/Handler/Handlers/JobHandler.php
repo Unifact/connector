@@ -3,14 +3,13 @@
 namespace Unifact\Connector\Handler\Handlers;
 
 use Illuminate\Support\Collection;
-use Psr\Log\LoggerInterface;
 use Unifact\Connector\Exceptions\ConnectorException;
 use Unifact\Connector\Exceptions\HandlerException;
 use Unifact\Connector\Handler;
 use Unifact\Connector\Handler\Interfaces\IStageProcessor;
 use Unifact\Connector\Handler\Stage;
 use Unifact\Connector\Log\ConnectorLogger;
-use Unifact\Connector\Log\Interfaces\IConnectorLogger;
+use Unifact\Connector\Log\ConnectorLoggerInterface;
 use Unifact\Connector\Log\StateOracle;
 use Unifact\Connector\Models\Job as JobModel;
 use Unifact\Connector\Models\Stage as StageModel;
@@ -56,6 +55,11 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
     private $oracle;
 
     /**
+     * @var array
+     */
+    private $stageMapping = [];
+
+    /**
      * @return string
      */
     public function getType()
@@ -77,7 +81,7 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
      * @param array $stages
      * @param JobContract $jobRepo
      * @param StageContract $stageRepo
-     * @param LoggerInterface $logger
+     * @param ConnectorLoggerInterface $logger
      * @param StateOracle $oracle
      */
     public function __construct(
@@ -85,7 +89,7 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
         array $stages = [],
         JobContract $jobRepo,
         StageContract $stageRepo,
-        LoggerInterface $logger,
+        ConnectorLoggerInterface $logger,
         StateOracle $oracle
     ) {
         parent::__construct();
@@ -106,11 +110,14 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
     {
         if ($this->stages->count() === 0) {
             $this->logger->warning("Job has no stages, cannot continue");
+
             return false;
         }
 
-        foreach ($this->stages as $stage) {
+        foreach ($this->stages as $n => $stage) {
+            $this->stageMapping[$stage->getName()] = $n + 1;
             $stage->setJobHandler($this);
+            $stage->setLogger($this->logger);
         }
 
         $this->logger->debug("Prepared Job with {$this->stages->count()} stages");
@@ -131,17 +138,18 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
 
         list($fromStageNumber, $preloadedData) = $this->prepareStageData($job);
 
-        foreach ($this->stages as $n => $stage) {
+        foreach ($this->stages as $stage) {
             try {
-                $stageNumber = $n + 1;
+
+                $stageNumber = $this->getStageNumber($stage);
                 if ($stageNumber < $fromStageNumber) {
                     $this->logger->info("Skipping Stage because of retry");
                     continue;
                 }
 
-                $this->oracle->setStageNumber($stageNumber);
+                $this->oracle->setStage($stage->getName());
 
-                $this->handleStage($job, $stage, $stageNumber, $preloadedData);
+                $this->handleStage($job, $stage, $preloadedData);
                 $this->logger->info("Stage successfully processed");
             } catch (\Exception $e) {
                 $this->logger->warning("Exception was thrown in the JobHandler handle() method, cannot continue (status: error)",
@@ -174,12 +182,13 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
     /**
      * @param JobModel $job
      * @param IStageProcessor $stage
-     * @param $number
      * @param null $preloadedData is used when status is STATUS_RETRY
      * @throws HandlerException
      */
-    protected function handleStage(JobModel $job, IStageProcessor $stage, $number, $preloadedData = null)
+    protected function handleStage(JobModel $job, IStageProcessor $stage, $preloadedData = null)
     {
+        $number = $this->getStageNumber($stage);
+
         try {
             if ($number === 1) {
                 // pass the parsed job data when this is the first stage.
@@ -189,7 +198,7 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
                     $processData = $preloadedData;
                 } else {
                     $lastStageNumber = $number - 1;
-                    $lastStage = $this->stageRepo->findByJobIdAndStage($job->id, $lastStageNumber);
+                    $lastStage = $this->stageRepo->findByJobIdAndStage($job->id, $this->getStageName($lastStageNumber));
                     if (is_null($lastStage)) {
                         throw new ConnectorException("Last Stage output is NULL, array expected.");
                     }
@@ -206,7 +215,7 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
             }
 
             $stageModel = $this->stageRepo->createStub([
-                'stage' => $number,
+                'stage' => $stage->getName(),
                 'data' => $data,
                 'status' => StageModel::STATUS_PROCESSED
             ]);
@@ -242,8 +251,9 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
             $lastStage = $this->stageRepo->findLastByJobIdAndStatus($job->id, 'processed');
 
             if ($lastStage !== null) {
-                $fromStageNumber = (int)$lastStage->stage + 1;
+                $fromStageNumber = array_get($this->stageMapping, $lastStage->stage);
                 $preloadedData = $lastStage->getParsedData();
+                $this->deleteFailedStages($lastStage);
             }
         } elseif ($job->status === JobModel::STATUS_RESTART) {
             $this->stageRepo->deleteByJobId($job->id);
@@ -265,5 +275,41 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
         $this->jobRepo->update($this->job->id, [
             'reference' => $reference
         ]);
+    }
+
+    /**
+     * @param IStageProcessor $stage
+     * @return int
+     */
+    private function getStageNumber(IStageProcessor $stage)
+    {
+        return array_get($this->stageMapping, $stage->getName());
+    }
+
+    /**
+     * @param $number
+     * @return int|null
+     */
+    private function getStageName($number)
+    {
+        foreach ($this->stageMapping as $name => $num) {
+            if ($num === $number) {
+                return $name;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param $stage
+     */
+    protected function deleteFailedStages($stage)
+    {
+        $deletes = $this->jobRepo->filter([['job_id', $stage->job_id], ['id', '>', $stage->id]]);
+
+        foreach ($deletes as $delete) {
+            $this->jobRepo->delete($delete->id);
+        }
     }
 }

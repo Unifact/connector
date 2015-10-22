@@ -7,7 +7,7 @@ use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
 use Unifact\Connector\Log\Handlers\DatabaseHandler;
 
-class ConnectorLogger extends Logger
+class ConnectorLogger extends Logger implements ConnectorLoggerInterface
 {
 
     /**
@@ -28,7 +28,7 @@ class ConnectorLogger extends Logger
         }
 
         if (array_get($handlers, 'db.enabled')) {
-            $log->pushHandler(new DatabaseHandler(array_get($handlers,'file.level', Logger::DEBUG)));
+            $log->pushHandler(new DatabaseHandler(array_get($handlers, 'db.level', Logger::DEBUG)));
         }
 
         if (array_get($handlers, 'hipchat.enabled')) {

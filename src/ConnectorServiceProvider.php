@@ -7,10 +7,13 @@ use Psr\Log\LoggerInterface;
 use Unifact\Connector\Console\RunCommand;
 use Unifact\Connector\Http\Middleware\Auth;
 use Unifact\Connector\Log\ConnectorLogger;
+use Unifact\Connector\Log\ConnectorLoggerInterface;
 use Unifact\Connector\Log\Interfaces\IConnectorLogger;
 use Unifact\Connector\Log\StateOracle;
 use Unifact\Connector\Repository\JobContract;
 use Unifact\Connector\Repository\JobRepository;
+use Unifact\Connector\Repository\LogContract;
+use Unifact\Connector\Repository\LogRepository;
 use Unifact\Connector\Repository\StageContract;
 use Unifact\Connector\Repository\StageRepository;
 
@@ -39,12 +42,13 @@ class ConnectorServiceProvider extends ServiceProvider
         ], 'public');
 
 
-
         $this->loadViewsFrom(__DIR__ . '/../views', 'connector');
 
         if (!$this->app->routesAreCached()) {
             require __DIR__ . '/../routes/routes.php';
         }
+
+        require __DIR__ . '/../misc/defines.php';
 
         $this->app['router']->middleware('connector.auth', Auth::class);
     }
@@ -58,9 +62,10 @@ class ConnectorServiceProvider extends ServiceProvider
     {
         $this->app->singleton(JobContract::class, JobRepository::class);
         $this->app->singleton(StageContract::class, StageRepository::class);
+        $this->app->singleton(LogContract::class, LogRepository::class);
 
         // Global logger
-        $this->app->singleton(LoggerInterface::class, function ($app) {
+        $this->app->singleton(ConnectorLoggerInterface::class, function ($app) {
             return ConnectorLogger::make();
         });
 
