@@ -2,7 +2,6 @@
 
 namespace Unifact\Connector\Repository;
 
-use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
 use Monolog\Logger;
 use Unifact\Connector\Models\Log;
@@ -44,7 +43,7 @@ class LogRepository implements LogContract
      * @param array $filters
      * @param $orderBy
      * @param $orderDir
-     * @return $this|Job
+     * @return Log
      */
     private function getFilterQry(array $filters, $orderBy, $orderDir)
     {
@@ -68,7 +67,6 @@ class LogRepository implements LogContract
 
         return $model;
     }
-
 
     /**
      * @param $perPage
