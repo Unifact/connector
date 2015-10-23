@@ -31,6 +31,10 @@ class SearchController extends BaseController
     }
 
 
+    /**
+     *
+     * @return \Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
+     */
     public function search()
     {
         $results = new Collection();
@@ -38,22 +42,55 @@ class SearchController extends BaseController
         $reference = \Input::get('reference');
         $data = \Input::get('data');
 
+        $dateFrom = \Input::get('from');
+        $dateTo = \Input::get('to');
+
+        $filters = [];
+
+        $time = ' 23:59:59';
+        if (!empty($dateFrom)) {
+            $filters[] = ['created_at', '>=', $dateFrom . $time];
+        }
+
+        if (!empty($dateTo)) {
+            $filters[] = ['created_at', '<=', $dateTo . $time];
+        }
+
         $jobs = [];
         $stages = [];
 
         $query = "";
 
+        $search = false;
+
+        $jobFilters = $filters;
+        $stageFilters = $filters;
+
         if (!empty($reference)) {
-            $jobs = $this->jobRepo->filter([['reference', $reference]]);
+            $jobFilters[] = ['reference', $reference];
+            $search = true;
+        }
 
-            $query = $reference;
-        } elseif (!empty($data)) {
-            $jobs = $this->jobRepo->filter([['data', 'LIKE', '%' . $data . '%']]);
-            $stages = $this->stageRepo->filter([['data', 'LIKE', '%' . $data . '%']]);
+        if (!empty($data)) {
+            $jobFilters[] = ['data', 'LIKE', '%' . $data . '%'];
+            $stageFilters[] = ['data', 'LIKE', '%' . $data . '%'];
+            $search = true;
+        }
 
-            $query = $data;
-        } else {
+        if (sizeof($filters) > 0) {
+            $search = true;
+        }
+
+        if ($search === false) {
             return \Redirect::route('connector.dashboard.index');
+        }
+
+
+        $jobs = $this->jobRepo->filter($jobFilters);
+        if(!empty($data)) {
+            $stages = $this->stageRepo->filter($stageFilters);
+        } else {
+            $stages = [];
         }
 
         foreach ($jobs as $job) {
@@ -70,7 +107,6 @@ class SearchController extends BaseController
 
         return \View::make('connector::search.results', [
             'results' => $results,
-            'query' => $query
         ]);
     }
 }
