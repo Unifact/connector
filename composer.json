@@ -1,7 +1,7 @@
 {
-    "name": "Unifact/Connector",
+    "name": "unifact/connector",
     "description": "Unifact connector",
-    "homepage": "https://github.com/Unifact/Connector",
+    "homepage": "https://github.com/Unifact/connector",
     "license": "MIT",
     "authors": [
         {
