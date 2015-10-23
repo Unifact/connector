@@ -4,9 +4,14 @@
 namespace Unifact\Connector\Repository;
 
 
+use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
 use Unifact\Connector\Models\Log;
 
+/**
+ * Interface LogContract
+ * @package Unifact\Connector\Repository
+ */
 interface LogContract
 {
 
@@ -23,4 +28,13 @@ interface LogContract
      * @return Log[]|Collection
      */
     public function filter(array $filters = [], $orderBy = 'created_at', $orderDir = 'asc');
+
+    /**
+     * @param $perPage
+     * @param array $filters
+     * @param $orderBy
+     * @param $orderDir
+     * @return mixed
+     */
+    public function paginate($perPage, $filters = [], $orderBy = 'created_at', $orderDir = 'desc');
 }

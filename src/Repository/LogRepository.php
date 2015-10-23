@@ -2,10 +2,15 @@
 
 namespace Unifact\Connector\Repository;
 
+use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
 use Monolog\Logger;
 use Unifact\Connector\Models\Log;
 
+/**
+ * Class LogRepository
+ * @package Unifact\Connector\Repository
+ */
 class LogRepository implements LogContract
 {
     /**
@@ -62,5 +67,18 @@ class LogRepository implements LogContract
         $model = $model->orderBy($orderBy, $orderDir);
 
         return $model;
+    }
+
+
+    /**
+     * @param $perPage
+     * @param array $filters
+     * @param $orderBy
+     * @param $orderDir
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function paginate($perPage, $filters = [], $orderBy = 'created_at', $orderDir = 'desc')
+    {
+        return $this->getFilterQry($filters, $orderBy, $orderDir)->paginate($perPage);
     }
 }

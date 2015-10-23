@@ -15,6 +15,9 @@ Route::group([
     // Dashboard
     Route::get('/', ['as' => 'connector.dashboard.index', 'uses' => 'DashboardController@index']);
 
+    // Logs
+    Route::get('logs', ['as' => 'connector.logs.index', 'uses' => 'LogController@index']);
+
     // Job
     Route::get('jobs/{jobId}', ['as' => 'connector.jobs.show', 'uses' => 'JobController@show']);
     Route::put('jobs/{jobId}', ['as' => 'connector.jobs.update', 'uses' => 'JobController@update']);

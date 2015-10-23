@@ -40,8 +40,11 @@
                 <div id="navbar" class="navbar-collapse collapse">
                     @section('navbar')
                         <ul class="nav navbar-nav">
-                            <li class="active">
+                            <li>
                                 <a href="{{ URL::route('connector.dashboard.index') }}">Dashboard</a>
+                            </li>
+                            <li>
+                                <a href="{{ URL::route('connector.logs.index') }}">Logs</a>
                             </li>
                             <form class="navbar-form navbar-right" action="{{ URL::route('connector.search') }}" method="GET">
                                 <input type="text" class="form-control" placeholder="Reference" name="reference">
