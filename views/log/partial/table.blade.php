@@ -7,6 +7,7 @@
             <table class="table table-condensed">
                 <thead>
                     <th class="smacol"></th>
+                    <th class="smacol">ID</th>
                     <th>Message</th>
                     <th>Job</th>
                     <th>Stage</th>
@@ -19,6 +20,7 @@
                             <td>
                                 <span class="{{ LOG_ICON }}" aria-hidden="true"></span>
                             </td>
+                            <td>{!! $log->url('connector.logs.show', 'id', [$log->id]) !!}</td>
                             <td>{{ $log->message }}</td>
                             <td>{!! $log->url('connector.jobs.show','job_id',[$log->job_id]) !!}</td>
                             <td>{{ $log->stage }}</td>

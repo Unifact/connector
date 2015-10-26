@@ -17,6 +17,7 @@ Route::group([
 
     // Logs
     Route::get('logs', ['as' => 'connector.logs.index', 'uses' => 'LogController@index']);
+    Route::get('logs/{id}', ['as' => 'connector.logs.show', 'uses' => 'LogController@show']);
 
     // Job
     Route::get('jobs/{jobId}', ['as' => 'connector.jobs.show', 'uses' => 'JobController@show']);
