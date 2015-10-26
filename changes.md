@@ -2,6 +2,8 @@
 
 #### ?
 -   Added: `NativeEmailHandler` now available for logging
+-   Added: Details view for log entries
+-   Changed: Switched the logs table to MyISAM engine
 
 #### [1.0.2] 2015-10-26
 -   Added: `ConnectorLoggerInterface` is now available in `Stage` and `CronHandler` class as $this->logger
