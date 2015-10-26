@@ -36,9 +36,9 @@ class DatabaseHandler extends AbstractProcessingHandler
             'message' => $record['message'],
             'level' => $record['level'],
             'data' => $record['formatted'],
-            'job_id' => $this->oracle->getJobId(),
-            'stage' => $this->oracle->getStage(),
         ];
+
+        $attributes = array_merge($attributes, $this->oracle->asArray());
 
         Log::create($attributes);
     }

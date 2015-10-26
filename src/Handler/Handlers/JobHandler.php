@@ -147,10 +147,10 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
                     continue;
                 }
 
-                $this->oracle->setStage($stage->getName());
-
+                $this->oracle->reset($job->id, $stage->getName());
                 $this->handleStage($job, $stage, $preloadedData);
                 $this->logger->info("Stage successfully processed");
+                $this->oracle->reset($job->id);
             } catch (\Exception $e) {
                 $this->logger->warning("Exception was thrown in the JobHandler handle() method, cannot continue (status: error)",
                     [
@@ -233,6 +233,7 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
         } catch (\Exception $e) {
             throw new HandlerException("Unexpected exception while processing stage (job_id: {$job->id}).");
         }
+
     }
 
     /**

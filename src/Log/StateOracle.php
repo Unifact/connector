@@ -15,6 +15,16 @@ class StateOracle
     protected $stage;
 
     /**
+     * @var string
+     */
+    protected $trace;
+
+    /**
+     * @var array
+     */
+    protected $vars = [];
+
+    /**
      * @return int
      */
     public function getJobId()
@@ -47,6 +57,31 @@ class StateOracle
     }
 
     /**
+     * @return string
+     */
+    public function getTrace()
+    {
+        return $this->trace;
+    }
+
+    /**
+     * @param string $trace
+     */
+    public function setTrace($trace)
+    {
+        $this->trace = $trace;
+    }
+
+    /**
+     * @param $var
+     * @param $value
+     */
+    public function setVar($var, $value)
+    {
+        $this->vars[$var] = $value;
+    }
+
+    /**
      * @param null $jobId
      * @param null $stage
      */
@@ -54,6 +89,15 @@ class StateOracle
     {
         $this->setJobId($jobId);
         $this->setStage($stage);
+
+        $this->setTrace(null);
+        $this->vars = [];
+    }
+
+    public function exception(\Exception $ex)
+    {
+        $this->setTrace($ex->getTraceAsString());
+        $this->setVar('ex_msg', $ex->getMessage());
     }
 
     /**
@@ -63,7 +107,9 @@ class StateOracle
     {
         return [
             'job_id' => $this->getJobId(),
-            'stage' => $this->getStage()
+            'stage' => $this->getStage(),
+            'vars' => $this->vars,
+            'trace' => $this->trace,
         ];
     }
 }

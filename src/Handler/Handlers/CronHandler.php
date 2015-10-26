@@ -6,23 +6,20 @@ namespace Unifact\Connector\Handler\Handlers;
 use Unifact\Connector\Events\ConnectorRunCronEvent;
 use Unifact\Connector\Handler\Handler;
 use Unifact\Connector\Handler\Interfaces\ICronHandler;
-use Unifact\Connector\Repository\JobContract;
+use Unifact\Connector\Log\ConnectorLoggerInterface;
+use Unifact\Connector\Repository\JobProviderContract;
 
 abstract class CronHandler extends Handler implements ICronHandler
 {
     /**
-     * @var JobContract
+     * @var JobProviderContract
      */
-    protected $jobRepo;
+    protected $jobProvider;
 
     /**
-     * CronHandler constructor.
-     * @param JobContract $jobRepo
+     * @var ConnectorLoggerInterface
      */
-    public function __construct(JobContract $jobRepo)
-    {
-        $this->jobRepo = $jobRepo;
-    }
+    protected $logger;
 
     /**
      * @param ConnectorRunCronEvent $event
@@ -30,10 +27,19 @@ abstract class CronHandler extends Handler implements ICronHandler
      */
     public function handle(ConnectorRunCronEvent $event)
     {
-        if ($this->prepare()) {
-            if ($this->run()) {
+        $this->jobProvider = $event->jobProvider;
+        $this->logger = $event->logger;
+
+        try {
+            if ($this->prepare() === false) {
+
+            } else {
+                $this->run();
                 $this->complete();
             }
+        } catch (\Exception $e) {
+            $this->logger->getOracle()->exception($e);
+            $this->logger->error("Unexpected exception in CronHandler class");
         }
 
         return true;
@@ -44,6 +50,9 @@ abstract class CronHandler extends Handler implements ICronHandler
      */
     public function prepare()
     {
+        $this->logger->getOracle()->reset();
+        $this->logger->getOracle()->setVar('CronHandler', get_class($this));
+
         return true;
     }
 

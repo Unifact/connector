@@ -9,6 +9,44 @@ use Unifact\Connector\Log\Handlers\DatabaseHandler;
 
 class ConnectorLogger extends Logger implements ConnectorLoggerInterface
 {
+    /**
+     * @var StateOracle
+     */
+    private $oracle;
+
+    /**
+     * @return StateOracle
+     */
+    public function getOracle()
+    {
+        return $this->oracle;
+    }
+
+    /**
+     * @param string $name
+     * @param StateOracle $oracle
+     * @param array $handlers
+     * @param array $processors
+     */
+    public function __construct($name, StateOracle $oracle, array $handlers = array(), array $processors = array())
+    {
+        $this->oracle = $oracle;
+
+        parent::__construct($name, $handlers, $processors);
+    }
+
+    /**
+     * @param int $level
+     * @param string $message
+     * @param array $context
+     * @return bool
+     */
+    public function addRecord($level, $message, array $context = array())
+    {
+        $context = array_merge($this->getOracle()->asArray(), $context);
+
+        return parent::addRecord($level, $message, $context);
+    }
 
     /**
      * @return Logger
@@ -18,7 +56,7 @@ class ConnectorLogger extends Logger implements ConnectorLoggerInterface
         $config = \Config::get('connector.logging');
         $context = array_get($config, 'context');
 
-        $log = new ConnectorLogger($context);
+        $log = app(ConnectorLogger::class, [$context]);
 
         $handlers = $config['handlers'];
 
