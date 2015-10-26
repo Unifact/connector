@@ -18,7 +18,7 @@ return [
                 'level' => Logger::INFO,
             ],
             'hipchat' => [
-                'enabled' => true,
+                'enabled' => false,
                 'level' => Logger::ERROR,
                 'token' => '',
                 'room' => '',
