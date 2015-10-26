@@ -11,6 +11,7 @@ use Unifact\Connector\Log\ConnectorLoggerInterface;
 use Unifact\Connector\Log\Interfaces\IConnectorLogger;
 use Unifact\Connector\Log\StateOracle;
 use Unifact\Connector\Repository\JobContract;
+use Unifact\Connector\Repository\JobProviderContract;
 use Unifact\Connector\Repository\JobRepository;
 use Unifact\Connector\Repository\LogContract;
 use Unifact\Connector\Repository\LogRepository;
@@ -61,6 +62,10 @@ class ConnectorServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton(JobContract::class, JobRepository::class);
+        $this->app->singleton(JobProviderContract::class, function($app){
+            return app(JobContract::class);
+        });
+
         $this->app->singleton(StageContract::class, StageRepository::class);
         $this->app->singleton(LogContract::class, LogRepository::class);
 

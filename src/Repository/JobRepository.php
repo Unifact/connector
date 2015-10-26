@@ -8,7 +8,7 @@ use Unifact\Connector\Exceptions\ConnectorException;
 use Unifact\Connector\Models\Job;
 use Unifact\Connector\Models\Stage as StageModel;
 
-class JobRepository implements JobContract
+class JobRepository implements JobContract, JobProviderContract
 {
     /**
      * @param $id
@@ -132,7 +132,7 @@ class JobRepository implements JobContract
 
         foreach ($filters as $filter) {
             if (count($filter) == 2) {
-                if($filter[1] === 'NOT NULL'){
+                if ($filter[1] === 'NOT NULL') {
                     $model = $model->whereNotNull($filter[0]);
                 } else {
                     $model = $model->where($filter[0], $filter[1]);
@@ -145,6 +145,20 @@ class JobRepository implements JobContract
         $model = $model->orderBy($orderBy, $orderDir);
 
         return $model;
+    }
+
+    /**
+     * @param $values
+     * @return bool
+     * @throws ConnectorException
+     */
+    public function insert($values)
+    {
+        if ($this->create($values)) {
+            return true;
+        }
+
+        return false;
     }
 
 
