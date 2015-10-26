@@ -1,6 +1,6 @@
 <?php /* created by Rob van Bentem, 16/10/2015 */
 
-$domain = env('CONNECTOR_DOMAIN', sprintf('%s.%s', 'connector', env('DOMAIN', 'localhost')));
+$domain = env('CONNECTOR_DOMAIN', sprintf('%s.%s', 'connector', env('DOMAIN', 'local.dev')));
 $namespace = '\Unifact\Connector\Http\Controllers';
 $prefix = env('CONNECTOR_PREFIX', 'cnr');
 

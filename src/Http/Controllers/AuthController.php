@@ -46,11 +46,15 @@ class AuthController extends BaseController
      */
     protected function checkCredentials()
     {
-        if (env('CONNECTOR_USER', str_random()) !== \Input::get('username', str_random())) {
+        if (env('CONNECTOR_USER') === null || env('CONNECTOR_PASS') === null) {
             return false;
         }
 
-        if (env('CONNECTOR_PASS', str_random()) !== \Input::get('password', str_random())) {
+        if (env('CONNECTOR_USER') !== \Input::get('username')) {
+            return false;
+        }
+
+        if (env('CONNECTOR_PASS') !== sha1(\Input::get('password'))) {
             return false;
         }
 
