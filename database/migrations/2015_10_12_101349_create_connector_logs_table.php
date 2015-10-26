@@ -20,6 +20,8 @@ class CreateConnectorLogsTable extends Migration
             $table->integer('job_id', false, true)->nullable();
             $table->string('stage', 64)->nullable();
             $table->timestamps();
+
+            $table->engine = 'MyISAM';
         });
     }
 
