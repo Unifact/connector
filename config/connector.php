@@ -17,6 +17,13 @@ return [
                 'enabled' => true,
                 'level' => Logger::INFO,
             ],
+            'email' => [
+                'enabled' => true,
+                'level' => Logger::ERROR,
+                'from' => null, // defaults to error@HOSTNAME
+                'subject' => 'Error in %s application',
+                'to' => [],
+            ],
             'hipchat' => [
                 'enabled' => false,
                 'level' => Logger::ERROR,

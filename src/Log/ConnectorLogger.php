@@ -3,6 +3,7 @@
 namespace Unifact\Connector\Log;
 
 use Monolog\Handler\HipChatHandler;
+use Monolog\Handler\NativeMailerHandler;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
 use Unifact\Connector\Log\Handlers\DatabaseHandler;
@@ -67,6 +68,20 @@ class ConnectorLogger extends Logger implements ConnectorLoggerInterface
 
         if (array_get($handlers, 'db.enabled')) {
             $log->pushHandler(new DatabaseHandler(array_get($handlers, 'db.level', Logger::DEBUG)));
+        }
+
+        if (array_get($handlers, 'email.enabled')) {
+            foreach (array_get($handlers, 'email.to') as $email) {
+                $subject = sprintf('Error in %s application', $context);
+                $from = array_get($handlers, 'email.from') ?: sprintf('error@%s', gethostname());
+
+                $log->pushHandler(new NativeMailerHandler(
+                    $email,
+                    $subject,
+                    $from,
+                    array_get($handlers, 'email.level')
+                ));
+            }
         }
 
         if (array_get($handlers, 'hipchat.enabled')) {
