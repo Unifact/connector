@@ -7,7 +7,6 @@
             <table class="table table-condensed">
                 <thead>
                     <th class="smacol"></th>
-                    <th class="smacol"></th>
                     <th class="smacol">ID</th>
                     <th>Type</th>
                     <th>Reference</th>
@@ -21,8 +20,7 @@
                             <td>
                                 <span class="{{ JOB_ICON }}" aria-hidden="true"></span>
                             </td>
-                            <td><a href="{{ URL::route('connector.jobs.show',[$job->id]) }}">view</a></td>
-                            <td>{{ $job->id }}</td>
+                            <td><a href="{{ URL::route('connector.jobs.show',[$job->id]) }}">{{ $job->id }}</a></td>
                             <td>{{ $job->type }}</td>
                             <td>{{ $job->reference }}</td>
                             <td>{{ $job->status }}</td>

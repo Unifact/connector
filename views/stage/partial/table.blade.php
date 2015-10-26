@@ -7,7 +7,6 @@
             <table class="table table-condensed">
                 <thead>
                     <th class="smacol"></th>
-                    <th class="smacol"></th>
                     <th class="smacol">ID</th>
                     <th>Stage</th>
                     <th>Status</th>
@@ -21,9 +20,8 @@
                                 <span class="{{ STAGE_ICON }}" aria-hidden="true"></span>
                             </td>
                             <td>
-                                <a href="{{ URL::route('connector.stages.show',[$stage->job_id, $stage->id]) }}">view</a>
+                                <a href="{{ URL::route('connector.stages.show',[$stage->job_id, $stage->id]) }}">{{ $stage->id }}</a>
                             </td>
-                            <td>{{ $stage->id }}</td>
                             <td>{{ $stage->stage }}</td>
                             <td>{{ $stage->status }}</td>
                             <td>{{ substr($stage->data,0,32) }}</td>
