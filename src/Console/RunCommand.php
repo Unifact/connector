@@ -85,7 +85,7 @@ class RunCommand extends Command
     private function runCron()
     {
         $this->out('Running cronjobs.');
-        \Event::fire(new ConnectorRunCronEvent());
+        \Event::fire(app(ConnectorRunCronEvent::class));
     }
 
     /**
