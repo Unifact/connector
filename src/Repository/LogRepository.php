@@ -13,6 +13,15 @@ use Unifact\Connector\Models\Log;
 class LogRepository implements LogContract
 {
     /**
+     * @param $id
+     * @return Log
+     */
+    public function findById($id)
+    {
+        return Log::findOrFail($id);
+    }
+
+    /**
      * @param array $filters
      * @param string $orderBy
      * @param string $orderDir

@@ -4,8 +4,8 @@
 namespace Unifact\Connector\Repository;
 
 
-use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Unifact\Connector\Models\Log;
 
 /**
@@ -14,6 +14,13 @@ use Unifact\Connector\Models\Log;
  */
 interface LogContract
 {
+
+    /**
+     * @param $id
+     * @return Log
+     * @throws ModelNotFoundException
+     */
+    public function findById($id);
 
     /**
      * @param int $amount
