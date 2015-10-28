@@ -34,7 +34,7 @@ class DashboardController extends BaseController
     public function index()
     {
         $jobs = $this->jobRepo->latest(10);
-        $issues = $this->jobRepo->filter([['status', '!=', 'handled'], ['status', '!=', 'new']]);
+        $issues = $this->jobRepo->filter([['status', '!=', 'handled'], ['status', '!=', 'new']], 'id', 'desc');
 
         $logs = Log::orderBy('id', 'desc')
             ->take(25)

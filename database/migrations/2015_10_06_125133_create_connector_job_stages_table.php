@@ -23,7 +23,7 @@ class CreateConnectorJobStagesTable extends Migration
             $table->foreign('job_id', 'fk_stage_jobId')
                 ->references('id')->on('connector_jobs');
 
-            $table->index(['job_id', 'stage'], 'idx_jobId_stage');
+            $table->unique(['job_id', 'stage'], 'unq_idx_jobId_stage');
             $table->index(['job_id', 'status'], 'idx_jobId_status');
         });
 
