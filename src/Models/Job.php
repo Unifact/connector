@@ -31,6 +31,7 @@ class Job extends \Eloquent
 
     public $fillable = [
         'type',
+        'priority',
         'reference',
         'data',
         'status',

@@ -15,6 +15,7 @@ class CreateConnectorJobsTable extends Migration
         Schema::create('connector_jobs', function (Blueprint $table) {
             $table->increments('id');
             $table->string('type', 64);
+            $table->smallInteger('priority')->unsigned();
             $table->text('data');
             $table->string('status', 32);
             $table->string('reference', 64);
