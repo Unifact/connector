@@ -246,7 +246,7 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
         $fromStageNumber = 1;
         $preloadedData = null;
 
-        if ($job->status === JobModel::STATUS_NEW) {
+        if ($job->status === JobModel::STATUS_NEW || $job->status === JobModel::STATUS_QUEUED) {
             // Defaults are OK
         } elseif ($job->status === JobModel::STATUS_RETRY) {
             $lastStage = $this->stageRepo->findLastByJobIdAndStatus($job->id, 'processed');

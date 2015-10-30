@@ -7,6 +7,7 @@ use Psr\Log\LoggerInterface;
 use Unifact\Connector\Events\ConnectorRunJobEvent;
 use Unifact\Connector\Exceptions\HandlerException;
 use Unifact\Connector\Handler\Interfaces\IJobHandler;
+use Unifact\Connector\Jobs\JobQueueHandler;
 use Unifact\Connector\Log\ConnectorLoggerInterface;
 use Unifact\Connector\Log\StateOracle;
 use Unifact\Connector\Models\Job;
@@ -107,18 +108,19 @@ class Manager
             try {
                 $this->oracle->reset($job->id);
 
-                $this->logger->info("Starting new '{$job->type}' Job");
+                $this->logger->info("Queueing new '{$job->type}' Job");
 
                 $this->logger->debug('Firing ConnectorRunJobEvent before handling Job');
+
                 \Event::fire(new ConnectorRunJobEvent($job));
 
                 $this->logger->debug('Starting Job handling procedure');
-                if (!$this->handleJob($job)) {
-                    $this->logger->notice('Job failed', $this->oracle->asArray());
-                }
+
+                $this->queueJob($job);
+
                 $this->oracle->reset();
             } catch (\Exception $e) {
-                $this->logger->critical('Unexpected exception while handling Job (requires in-depth investigation)', [
+                $this->logger->critical('Unexpected exception while queueing Job (requires in-depth investigation)', [
                     'oracle' => $this->oracle->asArray(),
                     'message' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
@@ -132,28 +134,14 @@ class Manager
      * @return bool
      * @throws HandlerException
      */
-    protected function handleJob(Job $job)
+    protected function queueJob(Job $job)
     {
         if ($this->hasHandlerForType($job->type)) {
-            $handler = $this->getHandlerForType($job->type);
+            \Queue::push(JobQueueHandler::class, ['job_id' => $job->id]);
 
-            $this->logger->debug("Preparing Job..");
-            if (!$handler->prepare()) {
-                $this->logger->error('Handler returned FALSE in prepare() method, see log for details');
-
-                return false;
-            }
-
-            $this->logger->debug("Handling Job..");
-            if ($handler->handle($job) === false) {
-                $this->logger->error('Handler returned FALSE in handle() method, see log for details');
-
-                return false;
-            }
-
-            $this->logger->debug("Completing Job..");
-            $handler->complete();
-            $this->logger->info('Finished Job successfully');
+            $this->jobRepo->update($job->id, [
+                'status' => 'queued',
+            ]);
 
             return true;
         }
