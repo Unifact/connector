@@ -110,11 +110,9 @@ class Manager
 
                 $this->logger->info("Queueing new '{$job->type}' Job");
 
-                $this->logger->debug('Firing ConnectorRunJobEvent before handling Job');
+                $this->logger->debug('Firing ConnectorRunJobEvent before queueing Job');
 
                 \Event::fire(new ConnectorRunJobEvent($job));
-
-                $this->logger->debug('Starting Job handling procedure');
 
                 $this->queueJob($job);
 
