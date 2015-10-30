@@ -23,9 +23,9 @@ abstract class CronHandler extends Handler implements ICronHandler
     protected $logger;
 
     /**
-     * @var string
+     * @return string
      */
-    protected $cron = '* * * * *';
+    abstract function getCronSchedule();
 
     /**
      * @param ConnectorRunCronEvent $event
@@ -37,9 +37,7 @@ abstract class CronHandler extends Handler implements ICronHandler
         $this->logger = $event->logger;
 
         try {
-            if ($this->prepare() === false) {
-
-            } else {
+            if ($this->prepare()) {
                 $this->run();
                 $this->complete();
             }
@@ -56,7 +54,7 @@ abstract class CronHandler extends Handler implements ICronHandler
      */
     public function prepare()
     {
-        $cron = CronExpression::factory($this->cron);
+        $cron = CronExpression::factory($this->getCronSchedule());
 
         if ($cron->isDue(date('c', $_SERVER['REQUEST_TIME']))) {
             return false;
