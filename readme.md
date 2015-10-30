@@ -15,7 +15,7 @@ Unifact Connector package for Laravel 5.1.
     - `CONNECTOR_PASS`: Password to access the connector (must be hashed with sha1)
     - `CONNECTOR_QUEUE_HIGH`: Name of the high priority queue
     - `CONNECTOR_QUEUE_LOW`: Name of the low priority queue
-    - `CONNECTOR_QUEUE_HIGH_TRESHOLD`: The treshold needed for a job to become high priority
+    - `CONNECTOR_QUEUE_HIGH_THRESHOLD`: The threshold needed for a job to become high priority
     
     The connector needs (need is a big word, but it's smart to it like this) both a subdomain and a routing prefix in order to work without conflict with your application.
 4.  Look at the `/config/connector.php` file and optionally turn on Hipchat logging.

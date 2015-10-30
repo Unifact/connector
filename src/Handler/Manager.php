@@ -137,12 +137,12 @@ class Manager
     protected function queueJob(Job $job)
     {
         if ($this->hasHandlerForType($job->type)) {
-            $treshold = env('CONNECTOR_QUEUE_HIGH_TRESHOLD');
+            $threshold = env('CONNECTOR_QUEUE_HIGH_THRESHOLD');
 
-            $queue = ($job->priority >= $treshold) ? env('CONNECTOR_QUEUE_HIGH') : env('CONNECTOR_QUEUE_LOW');
+            $queue = ($job->priority >= $threshold) ? env('CONNECTOR_QUEUE_HIGH') : env('CONNECTOR_QUEUE_LOW');
 
-            if($treshold == null || $queue == null) {
-                throw new \InvalidArgumentException("Treshold or queue is not set");
+            if($threshold == null || $queue == null) {
+                throw new \InvalidArgumentException("Threshold or queue is not set");
             }
 
             $this->jobRepo->update($job->id, [
