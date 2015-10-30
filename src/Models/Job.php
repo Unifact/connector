@@ -22,6 +22,10 @@ class Job extends \Eloquent
 
     const STATUS_SKIP = 'skip';
 
+    const STATUS_QUEUED = 'queued';
+
+    const STATUS_RESUME = 'resume';
+
 
     public $table = 'connector_jobs';
 

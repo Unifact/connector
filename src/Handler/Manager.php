@@ -134,26 +134,24 @@ class Manager
      */
     protected function handleJob(Job $job)
     {
-        $oracleInfo = $this->oracle->asArray();
-
         if ($this->hasHandlerForType($job->type)) {
             $handler = $this->getHandlerForType($job->type);
 
-            $this->logger->debug("Preparing Job..", $oracleInfo);
+            $this->logger->debug("Preparing Job..");
             if (!$handler->prepare()) {
-                $this->logger->error('Handler returned FALSE in prepare() method, see log for details', $oracleInfo);
+                $this->logger->error('Handler returned FALSE in prepare() method, see log for details');
 
                 return false;
             }
 
-            $this->logger->debug("Handling Job..", $oracleInfo);
+            $this->logger->debug("Handling Job..");
             if ($handler->handle($job) === false) {
-                $this->logger->error('Handler returned FALSE in handle() method, see log for details', $oracleInfo);
+                $this->logger->error('Handler returned FALSE in handle() method, see log for details');
 
                 return false;
             }
 
-            $this->logger->debug("Completing Job..", $oracleInfo);
+            $this->logger->debug("Completing Job..");
             $handler->complete();
             $this->logger->info('Finished Job successfully');
 
@@ -164,7 +162,7 @@ class Manager
             'status' => 'error',
         ]);
 
-        $this->logger->error("No handler registered for type '{$job->type}'", $oracleInfo);
+        $this->logger->error("No handler registered for type '{$job->type}'");
 
         return false;
     }

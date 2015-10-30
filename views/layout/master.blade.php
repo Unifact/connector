@@ -10,7 +10,6 @@
         <!-- Bootstrap core CSS -->
         <link href="{{ asset('vendor/unifact/lib/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
         <!-- Bootstrap theme -->
-        <link href="{{ asset('vendor/unifact/lib/bootstrap/css/bootstrap-theme.min.css') }}" rel="stylesheet">
 
         <!-- Custom styles for this template -->
         <link href="{{ asset('vendor/unifact/css/connector.css') }}" rel="stylesheet">

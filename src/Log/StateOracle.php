@@ -94,10 +94,22 @@ class StateOracle
         $this->vars = [];
     }
 
+    /**
+     * @param \Exception $ex
+     */
     public function exception(\Exception $ex)
     {
         $this->setTrace($ex->getTraceAsString());
         $this->setVar('ex_msg', $ex->getMessage());
+    }
+
+    /**
+     *
+     */
+    public function resetException()
+    {
+        $this->setTrace(null);
+        unset($this->vars['ex_msg']);
     }
 
     /**

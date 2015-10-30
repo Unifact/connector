@@ -39,17 +39,11 @@ class RunCommand extends Command
     /**
      * RunCommand constructor.
      * @param JobContract $jobRepo
-     * @param LoggerInterface $logger
+     * @param ConnectorLoggerInterface $logger
      */
     public function __construct(JobContract $jobRepo, ConnectorLoggerInterface $logger)
     {
         parent::__construct();
-
-/*        \DB::connection()->statement('SET foreign_key_checks = 0;');
-        \DB::connection()->table('connector_job_stages')->truncate();
-        \DB::connection()->table('connector_jobs')->truncate();
-        \DB::connection()->table('connector_logs')->truncate();
-        \DB::connection()->statement('SET foreign_key_checks = 1;');*/
 
         $this->jobRepo = $jobRepo;
         $this->manager = app(Manager::class);

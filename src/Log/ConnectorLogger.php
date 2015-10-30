@@ -46,6 +46,8 @@ class ConnectorLogger extends Logger implements ConnectorLoggerInterface
     {
         $context = array_merge($this->getOracle()->asArray(), $context);
 
+        $this->oracle->resetException();
+
         return parent::addRecord($level, $message, $context);
     }
 

@@ -14,6 +14,8 @@ class Stage extends \Eloquent
 
     const STATUS_ERROR = 'error';
 
+    const STATUS_QUEUED = 'queued';
+
 
     public $table = 'connector_job_stages';
 
