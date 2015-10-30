@@ -3,6 +3,7 @@
 namespace Unifact\Connector\Handler\Handlers;
 
 
+use Cron\CronExpression;
 use Unifact\Connector\Events\ConnectorRunCronEvent;
 use Unifact\Connector\Handler\Handler;
 use Unifact\Connector\Handler\Interfaces\ICronHandler;
@@ -20,6 +21,11 @@ abstract class CronHandler extends Handler implements ICronHandler
      * @var ConnectorLoggerInterface
      */
     protected $logger;
+
+    /**
+     * @var string
+     */
+    protected $cron = '* * * * *';
 
     /**
      * @param ConnectorRunCronEvent $event
@@ -50,6 +56,12 @@ abstract class CronHandler extends Handler implements ICronHandler
      */
     public function prepare()
     {
+        $cron = CronExpression::factory($this->cron);
+
+        if ($cron->isDue(date('c', $_SERVER['REQUEST_TIME']))) {
+            return false;
+        }
+
         $this->logger->getOracle()->reset();
         $this->logger->getOracle()->setVar('CronHandler', get_class($this));
 
