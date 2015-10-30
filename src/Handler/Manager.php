@@ -92,7 +92,7 @@ class Manager
     public function start()
     {
         foreach ($this->handleOrder as $status) {
-            $jobs = $this->jobRepo->filter([['status', $status]], 'id');
+            $jobs = $this->jobRepo->filter([['status', $status]], 'priority', 'desc');
 
             $this->logger->info("Starting Jobs with status '{$status}'");
             $this->handleJobs($jobs);
@@ -110,11 +110,9 @@ class Manager
 
                 $this->logger->info("Queueing new '{$job->type}' Job");
 
-                $this->logger->debug('Firing ConnectorRunJobEvent before handling Job');
+                $this->logger->debug('Firing ConnectorRunJobEvent before queueing Job');
 
                 \Event::fire(new ConnectorRunJobEvent($job));
-
-                $this->logger->debug('Starting Job handling procedure');
 
                 $this->queueJob($job);
 

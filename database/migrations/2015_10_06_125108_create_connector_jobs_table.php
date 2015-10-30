@@ -22,6 +22,7 @@ class CreateConnectorJobsTable extends Migration
             $table->timestamps();
 
             $table->index(['type', 'status'], 'idx_type_status');
+            $table->index(['priority', 'status'], 'idx_priority_status');
             $table->index('reference', 'idx_reference');
         });
 

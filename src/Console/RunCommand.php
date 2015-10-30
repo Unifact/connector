@@ -53,14 +53,29 @@ class RunCommand extends Command
 
     public function fire()
     {
-        // Allow handlers to register at the Manager
-        $this->registerHandler();
+        // Only allow 1 instance running at a time
+        if (\File::exists(storage_path('app/connector-running'))) {
+            $this->logger->info('Connector is already running, skipping this round');
 
-        // Run cronjobs by firing ConnectorRunCronEvent
-        $this->runCron();
+            return;
+        }
 
-        // Handle unfinished job in the connector_jobs table
-        $this->handleJobs();
+        \File::put(storage_path('app/connector-running'), date('c'));
+
+        try {
+            // Allow handlers to register at the Manager
+            $this->registerHandler();
+
+            // Run cronjobs by firing ConnectorRunCronEvent
+            $this->runCron();
+
+            // Handle unfinished job in the connector_jobs table
+            $this->handleJobs();
+        } catch (\Exception $e) {
+            $this->logger->emergency('Exception on the highest level possible, immediate action required', ['exception' => $e]);
+        } finally {
+            \File::delete(storage_path('app/connector-running'));
+        }
     }
 
 
