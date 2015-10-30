@@ -1,6 +1,6 @@
 ## Changelog
 
-#### ?
+#### [1.1.0] 2015-10-30
 -   Added: `NativeEmailHandler` now available for logging
 -   Added: Details view for log entries
 -   Added: Priority for jobs, can be run on a high or low priority queue handler
