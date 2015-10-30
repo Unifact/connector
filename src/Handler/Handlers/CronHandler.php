@@ -56,7 +56,7 @@ abstract class CronHandler extends Handler implements ICronHandler
     {
         $cron = CronExpression::factory($this->getCronSchedule());
 
-        if ($cron->isDue(date('c', $_SERVER['REQUEST_TIME']))) {
+        if ($cron->isDue(date('c', $_SERVER['REQUEST_TIME'])) === false) {
             return false;
         }
 

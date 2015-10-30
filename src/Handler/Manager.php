@@ -145,11 +145,11 @@ class Manager
                 throw new \InvalidArgumentException("Treshold or queue is not set");
             }
 
-            \Queue::push(JobQueueHandler::class, ['job_id' => $job->id], $queue);
-
             $this->jobRepo->update($job->id, [
                 'status' => 'queued',
             ]);
+
+            \Queue::push(JobQueueHandler::class, ['job_id' => $job->id], $queue);
 
             return true;
         }
