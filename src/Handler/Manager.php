@@ -92,7 +92,7 @@ class Manager
     public function start()
     {
         foreach ($this->handleOrder as $status) {
-            $jobs = $this->jobRepo->filter([['status', $status]], 'id');
+            $jobs = $this->jobRepo->filter([['status', $status]], 'priority', 'desc');
 
             $this->logger->info("Starting Jobs with status '{$status}'");
             $this->handleJobs($jobs);
