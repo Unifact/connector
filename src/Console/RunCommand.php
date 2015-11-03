@@ -72,7 +72,8 @@ class RunCommand extends Command
             // Handle unfinished job in the connector_jobs table
             $this->handleJobs();
         } catch (\Exception $e) {
-            $this->logger->emergency('Exception on the highest level possible, immediate action required', ['exception' => $e]);
+            $this->logger->getOracle()->exception($e);
+            $this->logger->emergency('Exception on the highest level possible, immediate action required');
         } finally {
             \File::delete(storage_path('app/connector-running'));
         }

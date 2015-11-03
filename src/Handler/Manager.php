@@ -139,12 +139,13 @@ class Manager
 
             $queue = ($job->priority >= $threshold) ? env('CONNECTOR_QUEUE_HIGH') : env('CONNECTOR_QUEUE_LOW');
 
-            if($threshold == null || $queue == null) {
+            if ($threshold == null || $queue == null) {
                 throw new \InvalidArgumentException("Threshold or queue is not set");
             }
 
             $this->jobRepo->update($job->id, [
                 'status' => 'queued',
+                'handler' => get_class($this->getHandlerForType($job->type)),
             ]);
 
             \Queue::push(JobQueueHandler::class, ['job_id' => $job->id], $queue);

@@ -16,6 +16,10 @@ use Unifact\Connector\Models\Stage as StageModel;
 use Unifact\Connector\Repository\JobContract;
 use Unifact\Connector\Repository\StageContract;
 
+/**
+ * Class JobHandler
+ * @package Unifact\Connector\Handler\Handlers
+ */
 abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\IJobHandler
 {
 
@@ -101,6 +105,14 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
         $this->stageRepo = $stageRepo;
         $this->logger = $logger;
         $this->oracle = $oracle;
+    }
+
+    /**
+     * @return JobHandler
+     * @throws ConnectorException
+     */
+    public static function make(){
+        throw new ConnectorException("make() function not implemented, cannot create JobHandler.");
     }
 
     /**

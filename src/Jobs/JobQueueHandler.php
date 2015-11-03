@@ -4,9 +4,7 @@ namespace Unifact\Connector\Jobs;
 
 use Illuminate\Contracts\Bus\SelfHandling;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Symfony\Component\HttpKernel\Log\LoggerInterface;
-use Unifact\Connector\Events\ConnectorRegisterHandlerEvent;
-use Unifact\Connector\Handler\Manager;
+use Psr\Log\LoggerInterface;
 use Unifact\Connector\Log\ConnectorLoggerInterface;
 use Unifact\Connector\Log\StateOracle;
 use Unifact\Connector\Repository\JobContract;
@@ -52,36 +50,38 @@ class JobQueueHandler implements SelfHandling, ShouldQueue
      */
     public function fire($syncJob, $arguments)
     {
-        $job = $this->jobRepo->findById($arguments['job_id']);
+        try {
+            $job = $this->jobRepo->findById($arguments['job_id']);
 
-        $event = new ConnectorRegisterHandlerEvent(app(Manager::class));
+            $handler = forward_static_call([$job->handler, 'make']);
 
-        \Event::fire($event);
+            $this->logger->debug("Preparing Job..");
+            if (!$handler->prepare()) {
+                $this->logger->error('Handler returned FALSE in prepare() method, see log for details');
 
-        /**
-         * @var $manager Manager
-         */
-        $manager = $event->manager;
+                return false;
+            }
 
-        $handler = $manager->getHandlerForType($job->type);
+            $this->logger->debug("Handling Job..");
+            if ($handler->handle($job) === false) {
+                $this->logger->error('Handler returned FALSE in handle() method, see log for details');
 
-        $this->logger->debug("Preparing Job..");
-        if (!$handler->prepare()) {
-            $this->logger->error('Handler returned FALSE in prepare() method, see log for details');
+                return false;
+            }
+
+            $this->logger->debug("Completing Job..");
+            $handler->complete();
+            $this->logger->info('Finished Job successfully');
+        } catch (\Exception $e) {
+            $this->oracle->exception($e);
+            $this->logger->error('Exception was thrown in JobQueueHandler::fire method.');
+
+            $this->jobRepo->update($arguments['job_id'], [
+                'status' => 'error'
+            ]);
 
             return false;
         }
-
-        $this->logger->debug("Handling Job..");
-        if ($handler->handle($job) === false) {
-            $this->logger->error('Handler returned FALSE in handle() method, see log for details');
-
-            return false;
-        }
-
-        $this->logger->debug("Completing Job..");
-        $handler->complete();
-        $this->logger->info('Finished Job successfully');
 
         $syncJob->delete();
 
