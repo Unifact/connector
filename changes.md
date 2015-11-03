@@ -1,5 +1,9 @@
 ## Changelog
 
+#### [1.1.1] 2015-11-03
+-   Added: added `handler` column in connector_jobs
+-   Added: queued jobs will resolve handler through service container based on connector_jobs `handler` column
+
 #### [1.1.0] 2015-10-30
 -   Added: `NativeEmailHandler` now available for logging
 -   Added: Details view for log entries
