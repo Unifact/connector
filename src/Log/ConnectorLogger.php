@@ -6,6 +6,7 @@ use Monolog\Handler\HipChatHandler;
 use Monolog\Handler\NativeMailerHandler;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
+use Unifact\Connector\Log\Handlers\ConsoleHandler;
 use Unifact\Connector\Log\Handlers\DatabaseHandler;
 
 class ConnectorLogger extends Logger implements ConnectorLoggerInterface
@@ -62,6 +63,8 @@ class ConnectorLogger extends Logger implements ConnectorLoggerInterface
         $log = app(ConnectorLogger::class, [$context]);
 
         $handlers = $config['handlers'];
+
+        $log->pushHandler(new ConsoleHandler(array_get($handlers, 'db.level', Logger::DEBUG)));
 
         if (array_get($handlers, 'file.enabled')) {
             $log->pushHandler(new RotatingFileHandler(storage_path('logs/' . $context), 30,

@@ -53,6 +53,10 @@ class RunCommand extends Command
 
     public function fire()
     {
+        if($this->option('verbose')) {
+            \App::singleton('console-connector-logger', $this->output);
+        }
+
         // Only allow 1 instance running at a time
         if (\File::exists(storage_path('app/connector-running'))) {
             $this->logger->info('Connector is already running, skipping this round');
