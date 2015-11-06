@@ -1,5 +1,11 @@
 ## Changelog
 
+#### [1.1.3] 2015-11-06
+-   Added: connector:run now runs infinitely
+
+#### [1.1.2] 2015-11-06
+-   Added: added console logging
+
 #### [1.1.1] 2015-11-03
 -   Added: added `handler` column in connector_jobs
 -   Added: queued jobs will resolve handler through service container based on connector_jobs `handler` column
