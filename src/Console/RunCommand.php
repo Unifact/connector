@@ -53,33 +53,26 @@ class RunCommand extends Command
 
     public function fire()
     {
-        if($this->option('verbose')) {
-            \App::singleton('console-connector-logger', $this->output);
+        if ($this->option('verbose')) {
+            \App::instance('console-connector-logger', $this->output);
         }
-
-        // Only allow 1 instance running at a time
-        if (\File::exists(storage_path('app/connector-running'))) {
-            $this->logger->info('Connector is already running, skipping this round');
-
-            return;
-        }
-
-        \File::put(storage_path('app/connector-running'), date('c'));
 
         try {
             // Allow handlers to register at the Manager
             $this->registerHandler();
 
-            // Run cronjobs by firing ConnectorRunCronEvent
-            $this->runCron();
+            for (; ;) {
+                // Run cronjobs by firing ConnectorRunCronEvent
+                $this->runCron();
 
-            // Handle unfinished job in the connector_jobs table
-            $this->handleJobs();
+                // Handle unfinished job in the connector_jobs table
+                $this->handleJobs();
+
+                sleep(5);
+            }
         } catch (\Exception $e) {
             $this->logger->getOracle()->exception($e);
             $this->logger->emergency('Exception on the highest level possible, immediate action required');
-        } finally {
-            \File::delete(storage_path('app/connector-running'));
         }
     }
 
