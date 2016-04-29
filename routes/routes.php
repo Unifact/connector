@@ -9,7 +9,7 @@ Route::group([
     'domain' => $domain,
     'prefix' => $prefix,
     'namespace' => $namespace,
-    'middleware' => ['connector.auth']
+    'middleware' => ['connector.auth', 'web']
 ], function () {
 
     // Dashboard
@@ -31,7 +31,7 @@ Route::group([
 });
 
 // Unrestricted routes
-Route::group(['domain' => $domain, 'namespace' => $namespace, 'prefix' => $prefix], function () {
+Route::group(['domain' => $domain, 'namespace' => $namespace, 'prefix' => $prefix, 'middleware' => ['web']], function () {
     Route::get('auth/login', ['uses' => 'AuthController@getLogin', 'as' => 'connector.auth.login.get']);
     Route::post('auth/login', ['uses' => 'AuthController@postLogin', 'as' => 'connector.auth.login.post']);
     Route::get('auth/logout', ['uses' => 'AuthController@logout', 'as' => 'connector.auth.logout']);
