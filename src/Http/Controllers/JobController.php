@@ -57,18 +57,18 @@ class JobController extends BaseController
     {
         $job = $this->jobRepo->findById($id);
 
-        if (!empty(\Input::get('save_restart'))) {
+        if (!empty(\Request::get('save_restart'))) {
 
             $this->jobRepo->update($id, [
-                'data' => \Input::get('data'),
+                'data' => \Request::get('data'),
                 'status' => 'restart'
             ]);
 
-        } elseif (!empty(\Input::get('restart'))) {
+        } elseif (!empty(\Request::get('restart'))) {
             $this->jobRepo->update($id, [
                 'status' => 'restart'
             ]);
-        } elseif (!empty(\Input::get('retry'))) {
+        } elseif (!empty(\Request::get('retry'))) {
             $this->jobRepo->update($id, [
                 'status' => 'retry'
             ]);

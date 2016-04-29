@@ -15,7 +15,7 @@ class Auth
      */
     public function handle($request, Closure $next)
     {
-        if (\Session::get('connector.auth', false) !== true) {
+        if (\Request::session()->get('connector.auth', false) !== true) {
             return \Redirect::route('connector.auth.login.get');
         }
 

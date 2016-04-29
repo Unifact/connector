@@ -22,12 +22,12 @@ class AuthController extends BaseController
     public function postLogin()
     {
         if ($this->checkCredentials()) {
-            \Session::put('connector.auth', true); // flag as logged in
+            \Request::session()->put('connector.auth', true); // flag as logged in
             return \Redirect::route('connector.dashboard.index');
         }
 
         return \Redirect::back()->withErrors([
-            'login' => 'Invalid credentials'
+            'login' => 'Invalid credentials',
         ], 'login');
     }
 
@@ -36,7 +36,7 @@ class AuthController extends BaseController
      */
     public function logout()
     {
-        \Session::forget('connector.auth');
+        \Request::session()->forget('connector.auth');
 
         return \Redirect::route('connector.auth.login.get');
     }
@@ -50,11 +50,11 @@ class AuthController extends BaseController
             return false;
         }
 
-        if (env('CONNECTOR_USER') !== \Input::get('username')) {
+        if (env('CONNECTOR_USER') !== \Request::get('username')) {
             return false;
         }
 
-        if (env('CONNECTOR_PASS') !== sha1(\Input::get('password'))) {
+        if (env('CONNECTOR_PASS') !== sha1(\Request::get('password'))) {
             return false;
         }
 

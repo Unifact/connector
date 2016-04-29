@@ -50,16 +50,16 @@
                             <form class="navbar-form navbar-right" action="{{ URL::route('connector.search') }}"
                                   method="GET">
                                 <input type="text" class="form-control input-sm nav-reference" placeholder="Reference"
-                                       name="reference" value="{{ \Input::get('reference') }}">
+                                       name="reference" value="{{ \Request::get('reference') }}">
                                 <input type="text" class="form-control input-sm nav-data" placeholder="Data" name="data"
-                                       value="{{ \Input::get('data') }}">
+                                       value="{{ \Request::get('data') }}">
 
                                 <div class="input-group input-daterange">
                                     <input name="from" type="text" class="form-control nav-dt input-sm"
-                                           value="{{ \Input::get('from') }}">
+                                           value="{{ \Request::get('from') }}">
                                     <span class="input-group-addon">to</span>
                                     <input name="to" type="text" class="form-control nav-dt input-sm"
-                                           value="{{ \Input::get('to') }}">
+                                           value="{{ \Request::get('to') }}">
                                 </div>
                                 <input type="submit" value="Search" name="search" class="btn btn-success btn-sm">
                             </form>

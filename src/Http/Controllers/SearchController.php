@@ -39,11 +39,11 @@ class SearchController extends BaseController
     {
         $results = new Collection();
 
-        $reference = \Input::get('reference');
-        $data = \Input::get('data');
+        $reference = \Request::get('reference');
+        $data = \Request::get('data');
 
-        $dateFrom = \Input::get('from');
-        $dateTo = \Input::get('to');
+        $dateFrom = \Request::get('from');
+        $dateTo = \Request::get('to');
 
         $filters = [];
 
