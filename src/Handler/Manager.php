@@ -2,6 +2,8 @@
 
 namespace Unifact\Connector\Handler;
 
+use Cron\CronExpression;
+use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Support\Collection;
 use Psr\Log\LoggerInterface;
 use Unifact\Connector\Events\ConnectorRunJobEvent;
@@ -15,10 +17,17 @@ use Unifact\Connector\Repository\JobContract;
 
 class Manager
 {
+    use DispatchesJobs;
+
     /**
      * @var Collection
      */
     protected $handlers;
+
+    /**
+     * @var Collection
+     */
+    protected $crons;
 
     /**
      * @var StateOracle
@@ -35,10 +44,13 @@ class Manager
      */
     private $jobRepo;
 
+    /**
+     * @var array
+     */
     protected $handleOrder = [
         'retry',
         'restart',
-        'new'
+        'new',
     ];
 
     /**
@@ -50,6 +62,7 @@ class Manager
     public function __construct(JobContract $jobRepo, StateOracle $oracle, ConnectorLoggerInterface $logger)
     {
         $this->handlers = new Collection();
+        $this->crons = new Collection();
         $this->oracle = $oracle;
         $this->logger = $logger;
         $this->jobRepo = $jobRepo;
@@ -61,6 +74,14 @@ class Manager
     public function pushHandler(IJobHandler $handler)
     {
         $this->handlers->offsetSet($handler->getType(), $handler);
+    }
+
+    /**
+     * @param $classNamespace
+     */
+    public function pushCron($classNamespace)
+    {
+        $this->crons->push($classNamespace);
     }
 
     /**
@@ -87,12 +108,36 @@ class Manager
     }
 
     /**
+     * Run registered cronjobs
+     * @param $date
+     */
+    public function crons($date)
+    {
+        foreach ($this->crons as $class) {
+            $cron = CronExpression::factory($class::getCronSchedule());
+
+            if ($cron->isDue($date)) {
+                $this->logger->info("Running cronjob '{$class}''");
+                try {
+                    $this->dispatch(app($class));
+                } catch (\Exception $e) {
+                    $this->logger->error("Error while running cronjob '{$class}''", [
+                        'oracle' => $this->oracle->asArray(),
+                        'message' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
+                    ]);
+                }
+            }
+        }
+    }
+
+    /**
      * Main enty point to handling Jobs, is called from the RunCommand class
      */
     public function start()
     {
         foreach ($this->handleOrder as $status) {
-            $jobs = $this->jobRepo->filter([['status', $status]], 'priority', 'desc');
+            $jobs = $this->jobRepo->filter([['status', $status]], 'id', 'asc');
 
             $this->logger->info("Starting Jobs with status '{$status}'");
             $this->handleJobs($jobs);

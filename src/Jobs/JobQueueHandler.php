@@ -4,6 +4,7 @@ namespace Unifact\Connector\Jobs;
 
 use Illuminate\Contracts\Bus\SelfHandling;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\Jobs\Job;
 use Psr\Log\LoggerInterface;
 use Unifact\Connector\Log\ConnectorLoggerInterface;
 use Unifact\Connector\Log\StateOracle;
@@ -13,7 +14,7 @@ use Unifact\Connector\Repository\JobContract;
  * Class JobQueueHandler
  * @package Unifact\Connector\Jobs
  */
-class JobQueueHandler implements SelfHandling, ShouldQueue
+class JobQueueHandler implements ShouldQueue
 {
     /**
      * @var JobContract
@@ -43,12 +44,12 @@ class JobQueueHandler implements SelfHandling, ShouldQueue
     }
 
     /**
-     * @param $syncJob
+     * @param Job $syncJob
      * @param $arguments
      * @return bool
      * @throws \Unifact\Connector\Exceptions\HandlerException
      */
-    public function fire($syncJob, $arguments)
+    public function fire(Job $syncJob, $arguments)
     {
         try {
             $job = $this->jobRepo->findById($arguments['job_id']);

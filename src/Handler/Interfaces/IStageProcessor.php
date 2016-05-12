@@ -14,7 +14,13 @@ interface IStageProcessor
 
     /**
      * @param array $data
-     * @return array|object
+     * @return void
+     */
+    public function setData(array $data);
+
+    /**
+     * @param array $data
+     * @return bool
      */
     public function process(array $data);
 }

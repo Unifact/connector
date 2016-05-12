@@ -1,11 +1,11 @@
-<?php /* created by Rob van Bentem, 05/10/2015 */
+<?php
 
 namespace Unifact\Connector\Events;
 
 use App\Events\Event;
 use Unifact\Connector\Handler\Manager;
 
-class ConnectorRegisterHandlerEvent extends Event
+class ConnectorRegisterEvent extends Event
 {
     /**
      * @var Manager
@@ -13,7 +13,7 @@ class ConnectorRegisterHandlerEvent extends Event
     public $manager;
 
     /**
-     * ConnectorRegisterHandlerEvent constructor.
+     * ConnectorRegisterEvent constructor.
      * @param Manager $manager
      */
     public function __construct(Manager $manager)

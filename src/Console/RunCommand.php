@@ -5,8 +5,9 @@ namespace Unifact\Connector\Console;
 use Illuminate\Console\Command;
 use Illuminate\Console\OutputStyle;
 use Psr\Log\LoggerInterface;
+use Unifact\Connector\Events\ConnectorRegisterCronEvent;
+use Unifact\Connector\Events\ConnectorRegisterEvent;
 use Unifact\Connector\Events\ConnectorRegisterHandlerEvent;
-use Unifact\Connector\Events\ConnectorRunCronEvent;
 use Unifact\Connector\Handler\Manager;
 use Unifact\Connector\Log\ConnectorLoggerInterface;
 use Unifact\Connector\Repository\JobContract;
@@ -22,6 +23,7 @@ class RunCommand extends Command
      * @var string
      */
     protected $description = 'Run the Unifact Connector';
+
     /**
      * @var JobContract
      */
@@ -31,10 +33,17 @@ class RunCommand extends Command
      * @var Manager
      */
     private $manager;
+
     /**
      * @var LoggerInterface
      */
     private $logger;
+
+    /**
+     * Last minute the cron has run
+     * @var null
+     */
+    private $lastCronMin = null;
 
     /**
      * RunCommand constructor.
@@ -58,8 +67,8 @@ class RunCommand extends Command
         }
 
         try {
-            // Allow handlers to register at the Manager
-            $this->registerHandler();
+            // Allow crons and handlers to register at the Manager
+            $this->fireManagerRegisterEvent();
 
             for (; ;) {
                 // Run cronjobs by firing ConnectorRunCronEvent
@@ -80,10 +89,10 @@ class RunCommand extends Command
     /**
      *
      */
-    private function registerHandler()
+    private function fireManagerRegisterEvent()
     {
-        $this->out('Registering handlers.');
-        \Event::fire(new ConnectorRegisterHandlerEvent($this->manager));
+        $this->out('Registering crons and handlers.');
+        \Event::fire(new ConnectorRegisterEvent($this->manager));
     }
 
     /**
@@ -92,7 +101,25 @@ class RunCommand extends Command
     private function runCron()
     {
         $this->out('Running cronjobs.');
-        \Event::fire(app(ConnectorRunCronEvent::class));
+
+        $min = date('H:i');
+        $date = date('c');
+
+        if ($min === $this->lastCronMin) {
+            return;
+        }
+
+        $this->lastCronMin = $min;
+
+        try {
+            $this->manager->crons($date);
+        } catch (\Exception $e) {
+            $this->logger->emergency("Highly unexpected exception while running Manager->cron(), investigation needed.",
+                [
+                    'message' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+        }
     }
 
     /**
@@ -108,7 +135,7 @@ class RunCommand extends Command
             $this->logger->emergency("Highly unexpected exception while running Manager->start(), investigation needed.",
                 [
                     'message' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
+                    'trace' => $e->getTraceAsString(),
                 ]);
         }
     }

@@ -3,8 +3,7 @@
 namespace Unifact\Connector\Handler\Handlers;
 
 
-use Cron\CronExpression;
-use Unifact\Connector\Events\ConnectorRunCronEvent;
+use Illuminate\Queue\InteractsWithQueue;
 use Unifact\Connector\Handler\Handler;
 use Unifact\Connector\Handler\Interfaces\ICronHandler;
 use Unifact\Connector\Log\ConnectorLoggerInterface;
@@ -12,6 +11,8 @@ use Unifact\Connector\Repository\JobProviderContract;
 
 abstract class CronHandler extends Handler implements ICronHandler
 {
+    use InteractsWithQueue;
+
     /**
      * @var JobProviderContract
      */
@@ -24,18 +25,18 @@ abstract class CronHandler extends Handler implements ICronHandler
 
     /**
      * @return string
+     * @throws \Exception
      */
-    abstract function getCronSchedule();
+    public static function getCronSchedule()
+    {
+        throw new \Exception("Not implemented.");
+    }
 
     /**
-     * @param ConnectorRunCronEvent $event
      * @return bool
      */
-    public function handle(ConnectorRunCronEvent $event)
+    public function handle()
     {
-        $this->jobProvider = $event->jobProvider;
-        $this->logger = $event->logger;
-
         try {
             if ($this->prepare()) {
                 $this->run();
@@ -54,11 +55,8 @@ abstract class CronHandler extends Handler implements ICronHandler
      */
     public function prepare()
     {
-        $cron = CronExpression::factory($this->getCronSchedule());
-
-        if ($cron->isDue(date('c', $_SERVER['REQUEST_TIME'])) === false) {
-            return false;
-        }
+        $this->logger = app(ConnectorLoggerInterface::class);
+        $this->jobProvider = app(JobProviderContract::class);
 
         $this->logger->getOracle()->reset();
         $this->logger->getOracle()->setVar('CronHandler', get_class($this));
@@ -71,7 +69,8 @@ abstract class CronHandler extends Handler implements ICronHandler
      */
     public function complete()
     {
-        // Do nothing
+        $this->delete();
     }
+
 
 }

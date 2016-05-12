@@ -55,6 +55,15 @@ abstract class Stage implements IStageProcessor
 
     /**
      * @param array $data
+     */
+    public function setData(array $data)
+    {
+        $this->jobHandler->setStageData($data);
+    }
+
+
+    /**
+     * @param array $data
      * @return array|object
      */
     abstract function process(array $data);

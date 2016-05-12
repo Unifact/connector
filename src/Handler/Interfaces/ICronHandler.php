@@ -2,16 +2,14 @@
 
 namespace Unifact\Connector\Handler\Interfaces;
 
-use Unifact\Connector\Events\ConnectorRunCronEvent;
 use Unifact\Connector\Exceptions\CronException;
 
 interface ICronHandler
 {
     /**
-     * @param ConnectorRunCronEvent $event
      * @return bool
      */
-    public function handle(ConnectorRunCronEvent $event);
+    public function handle();
 
     /**
      * @return bool

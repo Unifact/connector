@@ -3,28 +3,26 @@
 namespace Unifact\Connector\Events;
 
 use App\Events\Event;
-use Unifact\Connector\Log\ConnectorLoggerInterface;
-use Unifact\Connector\Repository\JobProviderContract;
 
 class ConnectorRunCronEvent extends Event
 {
     /**
-     * @var JobProviderContract
+     * @var
      */
-    public $jobProvider;
+    public $newMin;
 
     /**
-     * @var ConnectorLoggerInterface
+     * @var
      */
-    public $logger;
+    public $date;
 
     /**
-     * @param JobProviderContract $jobProvider
-     * @param ConnectorLoggerInterface $logger
+     * @param $date
+     * @param $newMin
      */
-    public function __construct(JobProviderContract $jobProvider, ConnectorLoggerInterface $logger)
+    public function __construct($date, $newMin)
     {
-        $this->jobProvider = $jobProvider;
-        $this->logger = $logger;
+        $this->date = $date;
+        $this->newMin = $newMin;
     }
 }

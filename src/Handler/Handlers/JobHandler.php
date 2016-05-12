@@ -59,6 +59,11 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
     private $oracle;
 
     /**
+     * @var array|null
+     */
+    private $stageData;
+
+    /**
      * @var array
      */
     private $stageMapping = [];
@@ -77,6 +82,14 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
     public function getJob()
     {
         return $this->job;
+    }
+
+    /**
+     * @param array $data
+     */
+    public function setStageData(array $data)
+    {
+        $this->stageData = $data;
     }
 
     /**
@@ -111,7 +124,8 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
      * @return JobHandler
      * @throws ConnectorException
      */
-    public static function make(){
+    public static function make()
+    {
         throw new ConnectorException("make() function not implemented, cannot create JobHandler.");
     }
 
@@ -160,23 +174,33 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
                 }
 
                 $this->oracle->reset($job->id, $stage->getName());
-                $this->handleStage($job, $stage, $preloadedData);
+                $continue = $this->handleStage($job, $stage, $preloadedData);
                 $this->logger->info("Stage successfully processed");
                 $this->oracle->reset($job->id);
+
+                if (!$continue) {
+                    break;
+                }
             } catch (\Exception $e) {
                 $this->logger->warning("Exception was thrown in the JobHandler handle() method, cannot continue (status: error)",
                     [
                         'exception_message' => $e->getMessage(),
-                        'exception_trace' => $e->getTraceAsString()
+                        'exception_trace' => $e->getTraceAsString(),
                     ]);
 
                 $this->jobRepo->update($job->id, [
-                    'status' => JobModel::STATUS_ERROR
+                    'status' => JobModel::STATUS_ERROR,
                 ]);
 
                 $success = false;
                 break;
             }
+        }
+
+        if ($success) {
+            $this->jobRepo->update($job->id, [
+                'status' => JobModel::STATUS_HANDLED,
+            ]);
         }
 
         return $success;
@@ -196,15 +220,17 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
      * @param IStageProcessor $stage
      * @param null $preloadedData is used when status is STATUS_RETRY
      * @throws HandlerException
+     * @return bool
      */
     protected function handleStage(JobModel $job, IStageProcessor $stage, $preloadedData = null)
     {
         $number = $this->getStageNumber($stage);
+        $this->stageData = null; // reset stage data result
 
         try {
             if ($number === 1) {
                 // pass the parsed job data when this is the first stage.
-                $data = $stage->process($preloadedData ?: $job->getParsedData());
+                $continue = $stage->process($preloadedData ?: $job->getParsedData());
             } else {
                 if ($preloadedData) {
                     $processData = $preloadedData;
@@ -218,28 +244,20 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
                 }
 
                 // pass the last processed stage's parsed data
-                $data = $stage->process($processData);
-            }
-
-            if (is_null($data) || $data === false) {
-                // $data must be array|object (it needs to be json decodeable to an array).
-                throw new ConnectorException("Data was NULL after processing stage.");
+                $continue = $stage->process($processData);
             }
 
             $stageModel = $this->stageRepo->createStub([
                 'stage' => $stage->getName(),
-                'data' => $data,
-                'status' => StageModel::STATUS_PROCESSED
+                'data' => $this->stageData ?: [],
+                'status' => StageModel::STATUS_PROCESSED,
             ]);
 
             if ($this->jobRepo->attachStage($job->id, $stageModel) === false) {
                 throw new HandlerException("Could not attach StageModel to JobModel (database/foreign key issue?).");
             }
 
-            $this->jobRepo->update($job->id, [
-                'status' => JobModel::STATUS_HANDLED
-            ]);
-
+            return $continue;
         } catch (ConnectorException $e) {
             throw new HandlerException($e->getMessage());
         } catch (\Exception $e) {
@@ -286,7 +304,7 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
     public function setJobReference($reference)
     {
         $this->jobRepo->update($this->job->id, [
-            'reference' => $reference
+            'reference' => $reference,
         ]);
     }
 
