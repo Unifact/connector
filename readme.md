@@ -2,7 +2,7 @@
 
 ### Intro
 
-Unifact Connector package for Laravel 5.1. 
+Unifact Connector package for Laravel 5.2 
 
 #### Installation
 
@@ -27,7 +27,6 @@ Unifact Connector package for Laravel 5.1.
 #### How to use
 
 - Resolve `JobProviderContract` through the service container to insert connector jobs.
-- Listen for the `ConnectorRunCronEvent` to perform tasks before handling connector jobs.
-- Listen for the `ConnectorRegisterHandlerEvent` to register JobHandlers for your connector job types.
+- Listen for the `ConnectorRegisterEvent` to register JobHandlers and/or CronHandlers.
 
 Run `php artisan connector:run` to perform the cron event and handle all connector jobs.

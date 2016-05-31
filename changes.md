@@ -1,5 +1,13 @@
 ## Changelog
 
+#### [1.2.1] 2016-05-31
+-   Fixed: retry and restart stages
+-   Fixed: console logging issue (sprintf instead of printf)
+
+#### [1.2.0] 2016-03-21
+-   Added: queued JobHandlers, CronHandlers
+-   Changed: improved cronhandlers
+
 #### [1.1.3] 2015-11-06
 -   Added: connector:run now runs infinitely
 
