@@ -42,6 +42,24 @@ class Job extends \Eloquent
         'stages',
     ];
 
+    protected $previousStatus;
+
+    /**
+     * @param mixed $previousStatus
+     */
+    public function setPreviousStatus($previousStatus)
+    {
+        $this->previousStatus = $previousStatus;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPreviousStatus()
+    {
+        return $this->previousStatus;
+    }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */

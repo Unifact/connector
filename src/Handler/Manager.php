@@ -14,6 +14,7 @@ use Unifact\Connector\Log\ConnectorLoggerInterface;
 use Unifact\Connector\Log\StateOracle;
 use Unifact\Connector\Models\Job;
 use Unifact\Connector\Repository\JobContract;
+use Unifact\Connector\Repository\StageContract;
 
 class Manager
 {
@@ -52,20 +53,26 @@ class Manager
         'restart',
         'new',
     ];
+    /**
+     * @var StageContract
+     */
+    private $stageRepo;
 
     /**
      * Manager constructor.
      * @param JobContract $jobRepo
      * @param StateOracle $oracle
      * @param ConnectorLoggerInterface $logger
+     * @param StageContract $stageRepo
      */
-    public function __construct(JobContract $jobRepo, StateOracle $oracle, ConnectorLoggerInterface $logger)
+    public function __construct(JobContract $jobRepo, StateOracle $oracle, ConnectorLoggerInterface $logger, StageContract $stageRepo)
     {
         $this->handlers = new Collection();
         $this->crons = new Collection();
         $this->oracle = $oracle;
         $this->logger = $logger;
         $this->jobRepo = $jobRepo;
+        $this->stageRepo = $stageRepo;
     }
 
     /**
@@ -193,7 +200,7 @@ class Manager
                 'handler' => get_class($this->getHandlerForType($job->type)),
             ]);
 
-            \Queue::push(JobQueueHandler::class, ['job_id' => $job->id], $queue);
+            \Queue::push(JobQueueHandler::class, ['job_id' => $job->id, 'previous_status' => $job->status], $queue);
 
             return true;
         }

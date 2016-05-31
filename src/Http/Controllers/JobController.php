@@ -2,6 +2,7 @@
 
 namespace Unifact\Connector\Http\Controllers;
 
+use Unifact\Connector\Models\Job;
 use Unifact\Connector\Presenters\JobPresenter;
 use Unifact\Connector\Repository\JobContract;
 use Unifact\Connector\Repository\LogContract;
@@ -61,16 +62,16 @@ class JobController extends BaseController
 
             $this->jobRepo->update($id, [
                 'data' => \Request::get('data'),
-                'status' => 'restart'
+                'status' => Job::STATUS_RESTART
             ]);
 
         } elseif (!empty(\Request::get('restart'))) {
             $this->jobRepo->update($id, [
-                'status' => 'restart'
+                'status' => Job::STATUS_RESTART
             ]);
         } elseif (!empty(\Request::get('retry'))) {
             $this->jobRepo->update($id, [
-                'status' => 'retry'
+                'status' => Job::STATUS_RETRY
             ]);
         }
 

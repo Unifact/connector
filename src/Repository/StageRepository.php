@@ -72,8 +72,7 @@ class StageRepository implements StageContract
      */
     public function findLastByJobIdAndStatus($jobId, $status)
     {
-        return Stage::orderBy('stage', 'desc')
-            ->orderBy('id', 'desc')
+        return Stage::orderBy('id', 'desc')
             ->where('job_id', '=', $jobId)
             ->where('status', '=', $status)
             ->first();

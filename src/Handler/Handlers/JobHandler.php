@@ -276,21 +276,21 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
         $fromStageNumber = 1;
         $preloadedData = null;
 
-        if ($job->status === JobModel::STATUS_NEW || $job->status === JobModel::STATUS_QUEUED) {
+        if ($job->getPreviousStatus() === JobModel::STATUS_NEW || $job->getPreviousStatus() === JobModel::STATUS_QUEUED) {
             // Defaults are OK
-        } elseif ($job->status === JobModel::STATUS_RETRY) {
+        } elseif ($job->getPreviousStatus() === JobModel::STATUS_RETRY) {
             $lastStage = $this->stageRepo->findLastByJobIdAndStatus($job->id, 'processed');
 
             if ($lastStage !== null) {
-                $fromStageNumber = array_get($this->stageMapping, $lastStage->stage);
+                $fromStageNumber = array_get($this->stageMapping, $lastStage->stage)+1;
                 $preloadedData = $lastStage->getParsedData();
                 $this->deleteFailedStages($lastStage);
             }
-        } elseif ($job->status === JobModel::STATUS_RESTART) {
+        } elseif ($job->getPreviousStatus() === JobModel::STATUS_RESTART) {
             $this->stageRepo->deleteByJobId($job->id);
             // Defaults are OK
         } else {
-            throw new HandlerException("Unexpected Job status (status: {$job->status}), cannot prepare Stages.");
+            throw new HandlerException("Unexpected Job status (status: {$job->getPreviousStatus()}), cannot prepare Stages.");
         }
 
         return [$fromStageNumber, $preloadedData];
@@ -337,7 +337,7 @@ abstract class JobHandler extends Handler\Handler implements Handler\Interfaces\
      */
     protected function deleteFailedStages($stage)
     {
-        $deletes = $this->jobRepo->filter([['job_id', $stage->job_id], ['id', '>', $stage->id]]);
+        $deletes = $this->stageRepo->filter([['job_id', $stage->job_id], ['id', '>', $stage->id]]);
 
         foreach ($deletes as $delete) {
             $this->jobRepo->delete($delete->id);

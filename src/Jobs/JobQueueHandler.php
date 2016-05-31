@@ -54,6 +54,8 @@ class JobQueueHandler implements ShouldQueue
         try {
             $job = $this->jobRepo->findById($arguments['job_id']);
 
+            $job->setPreviousStatus($arguments['previous_status']);
+
             $handler = forward_static_call([$job->handler, 'make']);
 
             $this->logger->debug("Preparing Job..");

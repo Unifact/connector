@@ -15,7 +15,7 @@ class ConsoleHandler extends AbstractProcessingHandler
     protected function write(array $record)
     {
         if(\App::bound('console-connector-logger')){
-            app('console-connector-logger')->writeln(printf("[%s] %d: %s", $record['datetime']->format('Y-m-d H:i:s'), $record['level'], $record['message']));
+            app('console-connector-logger')->writeln(sprintf("[%s] %d: %s", $record['datetime']->format('Y-m-d H:i:s'), $record['level'], $record['message']));
         }
     }
 }
