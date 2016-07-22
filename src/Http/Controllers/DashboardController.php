@@ -2,7 +2,6 @@
 
 namespace Unifact\Connector\Http\Controllers;
 
-use Unifact\Connector\Models\Log;
 use Unifact\Connector\Repository\JobContract;
 use Unifact\Connector\Repository\LogContract;
 
@@ -34,12 +33,7 @@ class DashboardController extends BaseController
     public function index()
     {
         $jobs = $this->jobRepo->latest(10);
-        $issues = $this->jobRepo->filter([['status', '!=', 'handled'], ['status', '!=', 'new']], 'id', 'desc');
-
-        $logs = Log::orderBy('id', 'desc')
-            ->take(25)
-            ->get();
-
+        $issues = $this->jobRepo->latest(25, [['status', '=', 'error']], 'id', 'desc');
         $logs = $this->logRepo->latest(25, [], 'id', 'desc');
 
         return \View::make('connector::dashboard.index', [
