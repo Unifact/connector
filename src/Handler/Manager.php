@@ -53,6 +53,7 @@ class Manager
         'restart',
         'new',
     ];
+
     /**
      * @var StageContract
      */
@@ -144,10 +145,13 @@ class Manager
     public function start()
     {
         foreach ($this->handleOrder as $status) {
-            $jobs = $this->jobRepo->filter([['status', $status]], 'id', 'asc');
-
             $this->logger->info("Starting Jobs with status '{$status}'");
-            $this->handleJobs($jobs);
+            $jobs = $this->getJobsWithStatus($status);
+
+            while (sizeof($jobs) > 0) {
+                $this->handleJobs($jobs);
+                $jobs = $this->getJobsWithStatus($status);
+            }
         }
     }
 
@@ -212,6 +216,15 @@ class Manager
         $this->logger->error("No handler registered for type '{$job->type}'");
 
         return false;
+    }
+
+    /**
+     * @param $status
+     * @return \Unifact\Connector\Models\Job[]
+     */
+    protected function getJobsWithStatus($status)
+    {
+        return $this->jobRepo->latest(100, [['status', $status]], 'id', 'asc');
     }
 
 }
