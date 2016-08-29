@@ -44,7 +44,7 @@ class JobQueueHandler implements ShouldQueue
     }
 
     /**
-     * @param Job $syncJob
+     * @param Job $syncJob Laravel queue job
      * @param $arguments
      * @return bool
      * @throws \Unifact\Connector\Exceptions\HandlerException
@@ -83,9 +83,13 @@ class JobQueueHandler implements ShouldQueue
                 'status' => 'error'
             ]);
 
+            // delete Laravel queue job
+            $syncJob->delete();
+
             return false;
         }
 
+        // delete Laravel queue job
         $syncJob->delete();
 
         return true;
