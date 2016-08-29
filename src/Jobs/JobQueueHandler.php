@@ -62,12 +62,18 @@ class JobQueueHandler implements ShouldQueue
             if (!$handler->prepare()) {
                 $this->logger->error('Handler returned FALSE in prepare() method, see log for details');
 
+                // delete Laravel queue job
+                $syncJob->delete();
+
                 return false;
             }
 
             $this->logger->debug("Handling Job..");
             if ($handler->handle($job) === false) {
                 $this->logger->error('Handler returned FALSE in handle() method, see log for details');
+
+                // delete Laravel queue job
+                $syncJob->delete();
 
                 return false;
             }
