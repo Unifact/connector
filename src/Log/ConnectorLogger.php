@@ -30,7 +30,7 @@ class ConnectorLogger extends Logger implements ConnectorLoggerInterface
      * @param array $handlers
      * @param array $processors
      */
-    public function __construct($name, StateOracle $oracle, array $handlers = array(), array $processors = array())
+    public function __construct($name, StateOracle $oracle, array $handlers = [], array $processors = [])
     {
         $this->oracle = $oracle;
 
@@ -43,7 +43,7 @@ class ConnectorLogger extends Logger implements ConnectorLoggerInterface
      * @param array $context
      * @return bool
      */
-    public function addRecord($level, $message, array $context = array())
+    public function addRecord($level, $message, array $context = [])
     {
         $context = array_merge($this->getOracle()->asArray(), $context);
 
@@ -67,8 +67,10 @@ class ConnectorLogger extends Logger implements ConnectorLoggerInterface
         $log->pushHandler(new ConsoleHandler(array_get($handlers, 'db.level', Logger::DEBUG)));
 
         if (array_get($handlers, 'file.enabled')) {
-            $log->pushHandler(new RotatingFileHandler(storage_path('logs/' . $context), 30,
-                array_get($handlers, 'file.level', Logger::DEBUG)));
+            $log->pushHandler(new RotatingFileHandler(storage_path('logs/' . $context),
+                array_get($handlers, 'file.keep_days', 30),
+                array_get($handlers, 'file.level', Logger::DEBUG)
+            ));
         }
 
         if (array_get($handlers, 'db.enabled')) {
