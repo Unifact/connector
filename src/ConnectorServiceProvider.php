@@ -88,8 +88,7 @@ class ConnectorServiceProvider extends ServiceProvider
             return app(CleanCommand::class);
         });
 
-        $this->commands('command.connector.run');
-        $this->commands('command.connector.clean');
+        $this->commands($this->provides());
     }
 
     /**

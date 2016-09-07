@@ -14,7 +14,7 @@ class CleanCommand extends Command
     /**
      * @var string
      */
-    protected $name = 'connector:clean {days}';
+    protected $signature = 'connector:clean {days}';
 
     /**
      * @var string
