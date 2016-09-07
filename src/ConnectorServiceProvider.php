@@ -3,7 +3,7 @@
 namespace Unifact\Connector;
 
 use Illuminate\Support\ServiceProvider;
-use Psr\Log\LoggerInterface;
+use Unifact\Connector\Console\CleanCommand;
 use Unifact\Connector\Console\RunCommand;
 use Unifact\Connector\Http\Middleware\Auth;
 use Unifact\Connector\Log\ConnectorLogger;
@@ -62,7 +62,7 @@ class ConnectorServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton(JobContract::class, JobRepository::class);
-        $this->app->singleton(JobProviderContract::class, function($app){
+        $this->app->singleton(JobProviderContract::class, function ($app) {
             return app(JobContract::class);
         });
 
@@ -83,7 +83,13 @@ class ConnectorServiceProvider extends ServiceProvider
             return app(RunCommand::class);
         });
 
+        // Register connector:clean command
+        $this->app['command.connector.clean'] = $this->app->share(function ($app) {
+            return app(CleanCommand::class);
+        });
+
         $this->commands('command.connector.run');
+        $this->commands('command.connector.clean');
     }
 
     /**
@@ -91,7 +97,7 @@ class ConnectorServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return ['command.connector.run'];
+        return ['command.connector.run', 'command.connector.clean'];
     }
 
 

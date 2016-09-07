@@ -44,4 +44,11 @@ interface LogContract
      * @return mixed
      */
     public function paginate($perPage, $filters = [], $orderBy = 'created_at', $orderDir = 'desc');
+
+    /**
+     * Clean logs older than $days days
+     * @param $days
+     * @return mixed
+     */
+    public function clean($days);
 }

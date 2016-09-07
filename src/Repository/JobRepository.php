@@ -161,5 +161,12 @@ class JobRepository implements JobContract, JobProviderContract
         return false;
     }
 
-
+    /**
+     * @param $days
+     * @return mixed|void
+     */
+    public function clean($days)
+    {
+        \DB::delete("DELETE FROM `connector_jobs` WHERE DATE_SUB(CURDATE(), INTERVAL ? DAY) >= `created_at`", [$days]);
+    }
 }

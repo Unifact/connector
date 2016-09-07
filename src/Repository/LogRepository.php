@@ -88,4 +88,13 @@ class LogRepository implements LogContract
     {
         return $this->getFilterQry($filters, $orderBy, $orderDir)->paginate($perPage);
     }
+
+    /**
+     * @param $days
+     * @return mixed|void
+     */
+    public function clean($days)
+    {
+        \DB::delete("DELETE FROM `connector_logs` WHERE DATE_SUB(CURDATE(), INTERVAL ? DAY) >= `created_at`", [$days]);
+    }
 }

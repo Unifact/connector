@@ -55,4 +55,11 @@ interface JobContract
      * @return \Unifact\Connector\Models\Job[]
      */
     public function latest($amount = 10, $filters = [], $orderBy = 'created_at', $orderDir = 'desc');
+
+    /**
+     * Clean jobs older than $days days
+     * @param $days
+     * @return mixed
+     */
+    public function clean($days);
 }
