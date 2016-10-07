@@ -2,7 +2,7 @@
 
 namespace Unifact\Connector\Events;
 
-use App\Events\Event;
+use Illuminate\Support\Facades\Event;
 use Unifact\Connector\Handler\Manager;
 
 class ConnectorRegisterEvent extends Event

@@ -2,7 +2,7 @@
 
 namespace Unifact\Connector\Events;
 
-use App\Events\Event;
+use Illuminate\Support\Facades\Event;
 
 class ConnectorRunCronEvent extends Event
 {
