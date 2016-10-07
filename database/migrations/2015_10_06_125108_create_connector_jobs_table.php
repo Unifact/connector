@@ -18,7 +18,7 @@ class CreateConnectorJobsTable extends Migration
             $table->smallInteger('priority')->unsigned();
             $table->text('data');
             $table->string('status', 32);
-            $table->string('reference', 64);
+            $table->string('reference', 64)->nullable();
             $table->timestamps();
 
             $table->index(['type', 'status'], 'idx_type_status');
