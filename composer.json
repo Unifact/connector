@@ -13,7 +13,7 @@
         "illuminate/support": "~5.1",
         "mtdowling/cron-expression": "~1.0",
         "php": ">=5.5.9",
-        "monolog/monolog": "^1.17",
+        "monolog/monolog": "1.22.0",
         "camspiers/json-pretty": "1.0.*"
     },
     "require-dev": {

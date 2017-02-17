@@ -5,6 +5,8 @@ namespace Unifact\Connector\Log;
 use Monolog\Handler\HipChatHandler;
 use Monolog\Handler\NativeMailerHandler;
 use Monolog\Handler\RotatingFileHandler;
+use Monolog\Handler\SlackHandler;
+use Monolog\Handler\SlackWebhookHandler;
 use Monolog\Logger;
 use Unifact\Connector\Log\Handlers\ConsoleHandler;
 use Unifact\Connector\Log\Handlers\DatabaseHandler;
@@ -98,6 +100,20 @@ class ConnectorLogger extends Logger implements ConnectorLoggerInterface
                 array_get($handlers, 'hipchat.name', 'Connector'),
                 array_get($handlers, 'hipchat.notify', false),
                 array_get($handlers, 'hipchat.level', Logger::ERROR)
+            ));
+        }
+
+        if (array_get($handlers, 'slack.enabled')) {
+            $log->pushHandler(new SlackWebhookHandler(
+                array_get($handlers, 'slack.webhook'),
+                array_get($handlers, 'slack.channel'),
+                array_get($handlers, 'slack.username'),
+                array_get($handlers, 'slack.useAttachment'),
+                array_get($handlers, 'slack.iconEmoji'),
+                array_get($handlers, 'slack.useShortAttachment'),
+                array_get($handlers, 'slack.includeContextAndExtra'),
+                array_get($handlers, 'slack.level'),
+                array_get($handlers, 'slack.bubble')
             ));
         }
 
