@@ -33,6 +33,18 @@ return [
                 'name' => env('CONNECTOR_LOG_HIPCHAT_NAME', ''),
                 'notify' => true // blink to draw attention to the user
             ],
+            'slack' => [
+                'enabled' => env('CONNECTOR_LOG_SLACK_ENABLED', false),
+                'webhook' => env('CONNECTOR_LOG_SLACK_WEBHOOK'),
+                'channel' => env('CONNECTOR_LOG_SLACK_CHANNEL'),
+                'username' => env('CONNECTOR_LOG_SLACK_USERNAME', 'Connector'),
+                'useAttachment' => env('CONNECTOR_LOG_SLACK_USE_ATTACHMENT', true),
+                'iconEmoji' => env('CONNECTOR_LOG_SLACK_ICONS_EMOJI', false),
+                'level' => env('CONNECTOR_LOG_SLACK_LEVEL', Logger::ERROR),
+                'bubble' => env('CONNECTOR_LOG_SLACK_BUBBLE', true),
+                'useShortAttachment' => env('CONNECTOR_LOG_SLACK_USE_SHORT_ATTACHMENT', false),
+                'includeContextAndExtra' => env('CONNECTOR_LOG_SLACK_INCLUDE_CONTEXT_AND_EXTRA', false)
+            ]
         ]
     ],
     'icons' => [
